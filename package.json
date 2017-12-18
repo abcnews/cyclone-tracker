@@ -1,0 +1,37 @@
+{
+  "name": "cyclone-tracker",
+  "version": "1.0.0",
+  "description": "A project generated from aunty's react-app template.",
+  "license": "MIT",
+  "private": true,
+  "contributors": [
+    "Nathan Hoad <nathan@nathanhoad.net>"
+  ],
+  "aunty": "react-app",
+  "scripts": {
+    "start": "aunty serve",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      ".*": "<rootDir>/node_modules/@abcnews/aunty/src/utils/jest"
+    }
+  },
+  "devDependencies": {
+    "@abcnews/aunty": "^7.6.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "jest": "^21.2.1",
+    "react-test-renderer": "^16.2.0"
+  },
+  "dependencies": {
+    "d3-geo": "^1.9.1",
+    "d3-request": "^1.0.6",
+    "d3-selection": "^1.2.0",
+    "lodash": "^4.17.4",
+    "object-assign": "^4.1.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "topojson": "^3.0.2"
+  }
+}

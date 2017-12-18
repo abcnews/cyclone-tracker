@@ -1,0 +1,21 @@
+.base {
+}
+
+.features {
+}
+
+.track {
+  stroke-dashoffset: 0;
+  stroke-dasharray: 15 5;
+  animation: marching 1s linear infinite;
+}
+
+@keyframes marching {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.cycloneImage {
+  transform: translate(-50%, -50%);
+}
