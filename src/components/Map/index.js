@@ -61,7 +61,7 @@ class Map extends React.Component {
 
   getCities(props) {
     const factor = 1 / (props.zoom || 1);
-    const distance = 20 * props.zoom;
+    const distance = 40 / factor;
 
     const bounds = this.path.bounds(this.centerArea);
     return citiesJSON.features
@@ -278,7 +278,18 @@ class Map extends React.Component {
     if (!this.centerArea) {
       this.centerArea = props.data.features.filter(f => f.properties.tracktype === 'Observed')[0];
     }
-    const center = this.path.centroid(this.centerArea);
+
+    let center;
+    if (props.centerOnCurrent) {
+      const current = props.data.features.filter(f => f.properties.fixType === 'Current')[0];
+      if (current) {
+        center = this.path.centroid(current);
+      }
+    }
+
+    if (!center) {
+      center = this.path.centroid(this.centerArea);
+    }
 
     const transform = `translate(${this.width / 2}, ${this.height / 2}) scale(${
       props.zoom

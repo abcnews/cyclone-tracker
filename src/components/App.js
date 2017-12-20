@@ -8,6 +8,7 @@ class App extends React.Component {
     super(props);
 
     this.state = {
+      centerOnCurrent: false,
       zoom: 1
     };
   }
@@ -15,11 +16,18 @@ class App extends React.Component {
   render() {
     return (
       <div className={styles.root} style={{ position: 'relative', borderTop: '2px solid black' }}>
-        <Map data={this.props.data} zoom={this.state.zoom} index={this.props.index} />
+        <Map
+          data={this.props.data}
+          zoom={this.state.zoom}
+          index={this.props.index}
+          centerOnCurrent={this.state.centerOnCurrent}
+        />
         <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
-          <button onClick={e => this.setState(state => ({ zoom: state.zoom === 1 ? 2 : 1 }))}>
-            Toggle {this.props.index + 1}
-          </button>
+          <button onClick={e => this.setState(state => ({ zoom: 1 }))}>1</button>
+          <button onClick={e => this.setState(state => ({ zoom: 2 }))}>2</button>
+          <button onClick={e => this.setState(state => ({ zoom: 4 }))}>3</button>
+          <button onClick={e => this.setState(state => ({ zoom: 8 }))}>4</button>
+          <button onClick={e => this.setState(state => ({ centerOnCurrent: !state.centerOnCurrent }))}>Center</button>
         </div>
       </div>
     );
