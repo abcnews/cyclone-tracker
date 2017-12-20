@@ -6,11 +6,11 @@ const GML = require('./loader');
 const PROJECT_NAME = 'cyclone-tracker';
 
 function init() {
-  [].slice.call(document.querySelectorAll(`[data-${PROJECT_NAME}-root]`)).forEach(root => {
+  [].slice.call(document.querySelectorAll(`[data-${PROJECT_NAME}-root]`)).forEach((root, index) => {
     d3.xml(root.getAttribute('data-url'), (err, xml) => {
       const data = GML.parse(xml);
       const App = require('./components/App');
-      render(<App data={data} />, root);
+      render(<App data={data} index={index} />, root);
     });
   });
 }

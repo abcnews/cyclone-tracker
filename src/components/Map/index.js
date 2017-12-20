@@ -4,81 +4,20 @@ const TopoJSON = require('topojson');
 
 const styles = require('./index.scss');
 const mapJSON = require('./australia.topo.json');
+const mapData = TopoJSON.feature(mapJSON, mapJSON.objects.australia).features;
 const citiesJSON = require('./cities.topo.json');
 const SERIF_FONT = 'ABCSerif,Book Antiqua,Palatino Linotype,Palatino,serif';
 const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
+const TRANSITION_DURATION = 500;
 
-const cycloneImages = {
-  '1': require('./cyclone-1.svg'),
-  '2': require('./cyclone-2.svg'),
-  '3': require('./cyclone-3.svg'),
-  '4': require('./cyclone-4.svg'),
-  '5': require('./cyclone-5.svg')
-};
-
-function stroke(d) {
-  if (d.properties.tracktype) {
-    switch (d.properties.tracktype) {
-      default:
-      case 'Observed':
-        return '#666';
-      case 'Forecast':
-        return '#515151';
-    }
-  } else if (d.properties.windtype) {
-    switch (d.properties.windtype) {
-      default:
-      case 'Damaging':
-        return '#b60707';
-      case 'Destructive':
-        return '#600000';
-    }
-  } else if (d.properties.fixType) {
-    return '#fff';
-  }
-
-  return 'transparent';
-}
-
-function fill(d) {
-  if (d.properties.areatype) {
-    switch (d.properties.areatype) {
-      default:
-      case 'Likely Tracks Area':
-        return 'url(#uncertainty)';
-      case 'Watch Area':
-        return '#ffbd55';
-      case 'Warning Area':
-        return '#ff9255';
-    }
-  } else if (d.properties.symbol) {
-    if (d.properties.fixType === 'Observed') {
-      return '#666';
-    } else if (d.properties.symbol === 'Low') {
-      return '#00a8ab';
-    } else {
-      switch (d.properties.category) {
-        default:
-        case '1':
-          return '#5fa800';
-        case '2':
-          return '#a0a300';
-        case '3':
-          return '#c78800';
-        case '4':
-          return '#d65200';
-        case '5':
-          return '#db0243';
-      }
-    }
-  }
-
-  return 'transparent';
-}
+const { cycloneImages, stroke, fill } = require('./util');
 
 class Map extends React.Component {
   constructor(props) {
     super(props);
+
+    this.key = props.index;
+    this.processData = this.processData.bind(this);
 
     this.getCities = this.getCities.bind(this);
 
@@ -89,8 +28,7 @@ class Map extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // TODO: Add any conditions that mitigate updating the graph
-    this.updateGraph(nextProps);
+    this.updateGraph(nextProps, true);
   }
 
   shouldComponentUpdate() {
@@ -99,6 +37,7 @@ class Map extends React.Component {
 
   componentDidMount() {
     this.initGraph(this.props);
+    this.updateGraph(this.props);
 
     window.addEventListener('resize', this.onResize);
   }
@@ -107,25 +46,35 @@ class Map extends React.Component {
     window.removeEventListener('resize', this.onResize);
   }
 
-  onResize() {
-    this.svg
-      .attr('width', this.props.width || window.innerWidth)
-      .attr('height', this.props.height || window.innerWidth);
+  processData(props) {
+    return props.data.features.map(f => {
+      f.uncertaintyKey = this.key;
+      f.x = this.path.centroid(f)[0];
+      f.y = this.path.centroid(f)[1];
+      return f;
+    });
   }
 
-  getCities() {
+  onResize() {
+    this.updateGraph(this.props);
+  }
+
+  getCities(props) {
+    const factor = 1 / (props.zoom || 1);
+    const distance = 20 * props.zoom;
+
     const bounds = this.path.bounds(this.centerArea);
     return citiesJSON.features
       .map(c => {
-        c.x = this.path.centroid(c)[0] + 4;
-        c.y = this.path.centroid(c)[1] + 2;
+        c.x = this.path.centroid(c)[0] + 8 * factor;
+        c.y = this.path.centroid(c)[1] + 4 * factor;
         return c;
       })
       .filter(c => {
-        if (c.x < bounds[0][0] - 20) return false;
-        if (c.x > bounds[1][0] + 20) return false;
-        if (c.y < bounds[0][1] - 20) return false;
-        if (c.y > bounds[1][1] + 20) return false;
+        if (c.x < bounds[0][0] - distance) return false;
+        if (c.x > bounds[1][0] + distance) return false;
+        if (c.y < bounds[0][1] - distance) return false;
+        if (c.y > bounds[1][1] + distance) return false;
 
         return true;
       })
@@ -139,7 +88,7 @@ class Map extends React.Component {
         array.forEach(other => {
           if (!other) return;
 
-          const isClose = Math.abs(current.x - other.x) < 3 || Math.abs(current.y - other.y) < 2;
+          const isClose = Math.abs(current.x - other.x) < 7 * factor || Math.abs(current.y - other.y) < 7 * factor;
           if (isClose && current.properties.population < other.properties.population) {
             r = null;
           }
@@ -157,33 +106,21 @@ class Map extends React.Component {
   initGraph(props) {
     if (!this.base) return;
 
-    this.width = props.width || window.innerWidth;
-    this.height = props.height || window.innerHeight;
-
     this.projection = d3
       .geoMercator()
-      // Adjust scale to zoom in and out while maintaining the scale of the annotations
-      .scale(this.width * 0.9)
+      .scale(1100)
       .center([136, -27]);
 
-    this.path = d3
-      .geoPath()
-      .projection(this.projection)
-      .pointRadius(6);
+    this.path = d3.geoPath().projection(this.projection);
 
-    this.svg = d3
-      .select(this.base)
-      .append('svg')
-      .attr('width', this.width)
-      .attr('height', this.height)
-      .style('background', '#efefef');
+    this.svg = d3.select(this.base).append('svg');
 
     this.svg
       .append('defs')
       .append('pattern')
       .append('defs')
       .append('pattern')
-      .attr('id', 'uncertainty')
+      .attr('id', 'uncertainty' + this.key)
       .attr('width', '6')
       .attr('height', '8')
       .attr('patternUnits', 'userSpaceOnUse')
@@ -194,22 +131,7 @@ class Map extends React.Component {
       .attr('transform', 'translate(0,0)')
       .attr('fill', '#555');
 
-    // Render Australia (and a few surrounding countries)
-    const mapData = TopoJSON.feature(mapJSON, mapJSON.objects.australia).features;
-
-    // Work out where the center of the map is
-    this.centerArea = props.data.features.filter(f => f.properties.areatype === 'Likely Tracks Area')[0];
-    if (!this.centerArea) {
-      this.centerArea = props.data.features.filter(f => f.properties.tracktype === 'Observed')[0];
-    }
-    const center = this.path.centroid(this.centerArea);
-
-    this.everything = this.svg
-      .append('g')
-      .attr(
-        'transform',
-        `translate(${this.width / 2}, ${this.height / 2}) scale(2) translate(${-center[0]}, ${-center[1]})`
-      );
+    this.everything = this.svg.append('g').attr('class', 'everything');
 
     this.mapFeatures = this.everything.append('g').attr('class', styles.features);
     this.mapFeatures
@@ -217,19 +139,12 @@ class Map extends React.Component {
       .data(mapData)
       .enter()
       .append('path')
-      .attr('d', this.path)
       .style('stroke', '#fff')
-      .style('stroke-width', 1)
-      .style('fill', '#ccc');
+      .style('fill', '#ccc')
+      .attr('d', this.path);
 
-    // Work out the cyclone information
-    const data = props.data.features.map(f => {
-      f.x = this.path.centroid(f)[0];
-      f.y = this.path.centroid(f)[1];
-      return f;
-    });
+    const data = this.processData(props);
 
-    // Render the warning areas
     const areaData = data.filter(f => {
       return f.properties.areatype === 'Watch Area' || f.properties.areatype === 'Warning Area';
     });
@@ -242,55 +157,37 @@ class Map extends React.Component {
       .attr('d', this.path)
       .style('fill', fill);
 
-    // Render place dots and names
-    const cities = this.getCities();
+    this.centerArea = props.data.features.filter(f => f.properties.areatype === 'Likely Tracks Area')[0];
+    if (!this.centerArea) {
+      this.centerArea = props.data.features.filter(f => f.properties.tracktype === 'Observed')[0];
+    }
+
+    const cities = this.getCities(props);
     this.places = this.everything.append('g').attr('class', styles.features);
-    this.places
-      .selectAll('path')
-      .data(cities)
-      .enter()
-      .append('path')
-      .attr(
-        'd',
-        d3
-          .geoPath()
-          .projection(this.projection)
-          .pointRadius(2)
-      )
-      .attr('fill', 'transparent')
-      .attr('stroke', 'black');
 
-    this.places
-      .selectAll('text')
-      .data(cities)
-      .enter()
-      .append('text')
-      .attr('font-family', SANS_SERIF_FONT)
-      .attr('font-size', 6)
-      .attr('x', d => d.x)
-      .attr('y', d => d.y)
-      .text(d => d.properties.name);
-
-    // Give any cyclones a spinning animation
     const cycloneData = data.filter(f => {
       return f.properties.symbol === 'Cyclone' && f.properties.fixType === 'Current';
     });
-    this.everything
+    this.images = this.everything.append('g');
+    this.images
       .selectAll('image')
       .data(cycloneData)
       .enter()
       .append('image')
+      .lower()
       .attr('class', styles.cycloneImage)
-      .attr('href', d => cycloneImages[d.properties.category])
-      .attr('x', d => d.x)
-      .attr('y', d => d.y)
-      .attr('width', 27)
-      .attr('height', 27);
+      .attr('href', d => cycloneImages[d.properties.category]);
 
     // Render the weather stuff
     const weatherData = data.filter(f => {
-      return f.properties.areatype !== 'Watch Area' && f.properties.areatype !== 'Warning Area';
+      return (
+        f.properties.areatype !== 'Watch Area' && f.properties.areatype !== 'Warning Area' && !f.properties.fixType
+      );
     });
+    const fixData = data.filter(f => {
+      return f.properties.fixType;
+    });
+
     this.features = this.everything.append('g').attr('class', styles.features);
     this.features
       .selectAll('path')
@@ -305,12 +202,17 @@ class Map extends React.Component {
         return '';
       })
       .style('stroke', stroke)
-      .style('stroke-width', 1)
+      .style('stroke-width', 2)
       .style('fill', fill)
-      .style('opacity', d => (d.properties.areatype === 'Likely Tracks Area' ? 0.3 : 1))
-      .on('click', d => {
-        console.log('d', d);
-      });
+      .style('opacity', d => (d.properties.areatype === 'Likely Tracks Area' ? 0.3 : 1));
+    this.features
+      .selectAll('circle')
+      .data(fixData)
+      .enter()
+      .append('circle')
+      .attr('r', 12)
+      .attr('fill', fill)
+      .attr('stroke', stroke);
     this.features
       .selectAll('text')
       .data(data)
@@ -318,10 +220,10 @@ class Map extends React.Component {
       .append('text')
       .attr('font-family', SANS_SERIF_FONT)
       .attr('font-weight', 'bold')
-      .attr('font-size', 7)
+      .attr('font-size', 14)
       .attr('fill', 'white')
       .attr('text-anchor', 'middle')
-      .attr('dy', 2)
+      .attr('dy', 4)
       .attr('x', d => d.x || -1000)
       .attr('y', d => d.y || -1000)
       .text(d => {
@@ -336,10 +238,145 @@ class Map extends React.Component {
       });
   }
 
-  updateGraph(props) {
-    if (!this.base) return;
+  updateGraph(props, willTransition) {
+    transition = typeof transition === 'undefined' ? true : transition;
 
-    // TODO: Use D3 to update the graph
+    const factor = 1 / (props.zoom || 1);
+
+    this.width = props.width || window.innerWidth;
+    this.height = props.height || window.innerHeight;
+
+    this.svg
+      .attr('width', this.width)
+      .attr('height', this.height)
+      .style('background', '#efefef');
+
+    this.svg
+      .select('#uncertainty' + this.key)
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('width', 12 * factor)
+      .attr('height', 16 * factor);
+    this.svg
+      .select('#uncertainty' + this.key + ' rect')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('width', 4 * factor)
+      .attr('height', 16 * factor);
+
+    // Work out where the center of the map is
+    this.centerArea = props.data.features.filter(f => f.properties.areatype === 'Likely Tracks Area')[0];
+    if (!this.centerArea) {
+      this.centerArea = props.data.features.filter(f => f.properties.tracktype === 'Observed')[0];
+    }
+    const center = this.path.centroid(this.centerArea);
+
+    const transform = `translate(${this.width / 2}, ${this.height / 2}) scale(${
+      props.zoom
+    }) translate(${-center[0]}, ${-center[1]})`;
+    if (willTransition) {
+      this.everything
+        .transition()
+        .duration(TRANSITION_DURATION)
+        .attr('transform', transform);
+    } else {
+      this.everything.attr('transform', transform);
+    }
+
+    this.mapFeatures.attr('d', this.path).style('stroke-width', 1 * factor);
+
+    // Work out the cyclone information
+    const data = this.processData(props);
+
+    // Render the warning areas
+    const areaData = data.filter(f => {
+      return f.properties.areatype === 'Watch Area' || f.properties.areatype === 'Warning Area';
+    });
+
+    this.areaFeatures
+      .selectAll('path')
+      .data(areaData)
+      .attr('d', this.path);
+
+    // Render place dots and names
+    const cities = this.getCities(props);
+    this.places.selectAll('path').remove();
+    this.places
+      .selectAll('path')
+      .data(cities)
+      .enter()
+      .append('path')
+      .attr(
+        'd',
+        d3
+          .geoPath()
+          .projection(this.projection)
+          .pointRadius(3 * factor)
+      )
+      .attr('fill', 'transparent')
+      .attr('stroke', 'black')
+      .attr('stroke-width', 1 * factor);
+    this.places.selectAll('text').remove();
+    this.places
+      .selectAll('text')
+      .data(cities)
+      .enter()
+      .append('text')
+      .attr('x', d => d.x)
+      .attr('y', d => d.y)
+      .attr('font-family', SANS_SERIF_FONT)
+      .text(d => d.properties.name)
+      .attr('font-size', 12 * factor);
+
+    // Give the current cyclone (if there is one) a spinning animation
+    const cycloneData = data.filter(f => {
+      return f.properties.symbol === 'Cyclone' && f.properties.fixType === 'Current';
+    });
+    const cycloneSize = 60 * factor;
+    this.images
+      .selectAll('image')
+      .data(cycloneData)
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('href', d => cycloneImages[d.properties.category])
+      .attr('x', d => d.x - cycloneSize / 2)
+      .attr('y', d => d.y - cycloneSize / 2)
+      .attr('width', cycloneSize)
+      .attr('height', cycloneSize);
+
+    // Render the weather stuff
+    const weatherData = data.filter(f => {
+      return f.properties.areatype !== 'Watch Area' && f.properties.areatype !== 'Warning Area';
+    });
+    this.features
+      .selectAll('path')
+      .data(weatherData)
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('d', this.path)
+      .style('stroke-width', 2 * factor);
+
+    const fixData = data.filter(f => {
+      return f.properties.fixType;
+    });
+    this.features
+      .selectAll('circle')
+      .data(fixData)
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('r', 12 * factor)
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('stroke-width', 2 * factor);
+    this.features
+      .selectAll('text')
+      .data(data)
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('font-size', 14 * factor)
+      .attr('dy', 4 * factor)
+      .attr('x', d => d.x || -1000)
+      .attr('y', d => d.y || -1000);
   }
 
   render() {

@@ -2061,7 +2061,8 @@
     </point>
     <fixType>Current</fixType>
     <fixTime>2015-02-18T06:00:00Z</fixTime>
-    <symbol>Low</symbol>
+    <symbol>Cyclone</symbol>
+    <category>1</category>
     <category/>
     <timeOffset>0</timeOffset>
   </tcFix>
