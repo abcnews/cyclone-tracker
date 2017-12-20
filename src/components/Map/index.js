@@ -8,7 +8,7 @@ const mapData = TopoJSON.feature(mapJSON, mapJSON.objects.australia).features;
 const citiesJSON = require('./cities.topo.json');
 const SERIF_FONT = 'ABCSerif,Book Antiqua,Palatino Linotype,Palatino,serif';
 const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
-const TRANSITION_DURATION = 500;
+const TRANSITION_DURATION = 600;
 
 const { cycloneImages, stroke, fill } = require('./util');
 
@@ -284,6 +284,11 @@ class Map extends React.Component {
       const current = props.data.features.filter(f => f.properties.fixType === 'Current')[0];
       if (current) {
         center = this.path.centroid(current);
+      }
+    } else if (props.city) {
+      const city = citiesJSON.features.filter(f => f.properties.name.toLowerCase() === props.city.toLowerCase())[0];
+      if (city) {
+        center = this.path.centroid(city);
       }
     }
 

@@ -9,7 +9,8 @@ class App extends React.Component {
 
     this.state = {
       centerOnCurrent: false,
-      zoom: 1
+      zoom: 1,
+      city: null
     };
   }
 
@@ -21,6 +22,7 @@ class App extends React.Component {
           zoom={this.state.zoom}
           index={this.props.index}
           centerOnCurrent={this.state.centerOnCurrent}
+          city={this.state.city}
         />
         <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
           <button onClick={e => this.setState(state => ({ zoom: 1 }))}>1</button>
@@ -28,6 +30,9 @@ class App extends React.Component {
           <button onClick={e => this.setState(state => ({ zoom: 4 }))}>3</button>
           <button onClick={e => this.setState(state => ({ zoom: 8 }))}>4</button>
           <button onClick={e => this.setState(state => ({ centerOnCurrent: !state.centerOnCurrent }))}>Center</button>
+          <button onClick={e => this.setState(state => ({ city: state.city ? null : 'Rockhampton' }))}>
+            Rockhampton
+          </button>
         </div>
       </div>
     );
