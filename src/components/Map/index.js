@@ -108,7 +108,7 @@ class Map extends React.Component {
 
     this.projection = d3
       .geoMercator()
-      .scale(1100)
+      .scale(900)
       .center([136, -27]);
 
     this.path = d3.geoPath().projection(this.projection);
@@ -205,18 +205,22 @@ class Map extends React.Component {
       .style('stroke-width', 2)
       .style('fill', fill)
       .style('opacity', d => (d.properties.areatype === 'Likely Tracks Area' ? 0.3 : 1));
-    this.features
-      .selectAll('circle')
+    this.dots = this.features
+      .selectAll('g.dot')
       .data(fixData)
       .enter()
+      .append('g')
+      .attr('class', 'dot');
+
+    this.dots
       .append('circle')
       .attr('r', 12)
       .attr('fill', fill)
-      .attr('stroke', stroke);
-    this.features
-      .selectAll('text')
-      .data(data)
-      .enter()
+      .attr('stroke', stroke)
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y);
+
+    this.dots
       .append('text')
       .attr('font-family', SANS_SERIF_FONT)
       .attr('font-weight', 'bold')
@@ -224,8 +228,8 @@ class Map extends React.Component {
       .attr('fill', 'white')
       .attr('text-anchor', 'middle')
       .attr('dy', 4)
-      .attr('x', d => d.x || -1000)
-      .attr('y', d => d.y || -1000)
+      .attr('x', d => d.x)
+      .attr('y', d => d.y)
       .text(d => {
         if (d.properties.symbol) {
           switch (d.properties.symbol) {
@@ -238,6 +242,11 @@ class Map extends React.Component {
       });
   }
 
+  /**
+   * Update the values on the map
+   * @param {object} props
+   * @param {boolean?} willTransition
+   */
   updateGraph(props, willTransition) {
     transition = typeof transition === 'undefined' ? true : transition;
 
@@ -359,24 +368,23 @@ class Map extends React.Component {
     const fixData = data.filter(f => {
       return f.properties.fixType;
     });
-    this.features
+    this.dots.data(fixData);
+
+    this.dots
       .selectAll('circle')
-      .data(fixData)
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('r', 12 * factor)
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
       .attr('stroke-width', 2 * factor);
-    this.features
+    this.dots
       .selectAll('text')
       .data(data)
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('font-size', 14 * factor)
-      .attr('dy', 4 * factor)
-      .attr('x', d => d.x || -1000)
-      .attr('y', d => d.y || -1000);
+      .attr('dy', 4 * factor);
   }
 
   render() {
