@@ -16,7 +16,7 @@ class Map extends React.Component {
   constructor(props) {
     super(props);
 
-    this.key = props.index;
+    this.key = props.index || Math.floor(Math.random * 100000).toString();
     this.processData = this.processData.bind(this);
 
     this.getCities = this.getCities.bind(this);
@@ -47,12 +47,54 @@ class Map extends React.Component {
   }
 
   processData(props) {
-    return props.data.features.map(f => {
+    let areaData = [];
+    let cycloneData = [];
+    let weatherData = [];
+    let fixData = [];
+    let centerArea = null;
+
+    if (!props.data || !props.data.features)
+      return { data: [], areaData, cycloneData, weatherData, fixData, centerArea };
+
+    const data = props.data.features.map(f => {
       f.uncertaintyKey = this.key;
       f.x = this.path.centroid(f)[0];
       f.y = this.path.centroid(f)[1];
       return f;
     });
+
+    let fallbackCenterArea;
+    data.forEach(d => {
+      if (d.properties.areatype === 'Watch Area' || d.properties.areatype === 'Warning Area') {
+        areaData.push(d);
+      }
+
+      if (d.properties.symbol === 'Cyclone' && d.properties.fixType === 'Current') {
+        cycloneData.push(d);
+      }
+
+      if (d.properties.areatype !== 'Watch Area' && d.properties.areatype !== 'Warning Area' && !d.properties.fixType) {
+        weatherData.push(d);
+      }
+
+      if (d.properties.fixType) {
+        fixData.push(d);
+      }
+
+      if (d.properties.areatype === 'Likely Tracks Area') {
+        centerArea = d;
+      }
+      if (d.properties.tracktype === 'Observed') {
+        fallbackCenterArea = d;
+      }
+    });
+
+    // If there is no likely tracks, just use the observed area
+    if (!centerArea.properties) {
+      centerArea = fallbackCenterArea;
+    }
+
+    return { data, areaData, cycloneData, weatherData, fixData, centerArea };
   }
 
   onResize() {
@@ -60,6 +102,8 @@ class Map extends React.Component {
   }
 
   getCities(props) {
+    if (!this.centerArea) return [];
+
     const factor = 1 / (props.zoom || 1);
     const distance = 40 * factor;
 
@@ -114,7 +158,6 @@ class Map extends React.Component {
     this.path = d3.geoPath().projection(this.projection);
 
     this.svg = d3.select(this.base).append('svg');
-
     this.svg
       .append('defs')
       .append('pattern')
@@ -130,9 +173,9 @@ class Map extends React.Component {
       .attr('transform', 'translate(1,1)')
       .attr('fill', '#555');
 
-    this.everything = this.svg.append('g').attr('class', 'everything');
+    this.everything = this.svg.append('g');
 
-    this.mapFeatures = this.everything.append('g').attr('class', styles.features);
+    this.mapFeatures = this.everything.append('g');
     this.mapFeatures
       .selectAll('path')
       .data(mapData)
@@ -142,11 +185,8 @@ class Map extends React.Component {
       .style('fill', '#ccc')
       .attr('d', this.path);
 
-    const data = this.processData(props);
+    const { areaData, cycloneData, weatherData, fixData, centerArea } = this.processData(props);
 
-    const areaData = data.filter(f => {
-      return f.properties.areatype === 'Watch Area' || f.properties.areatype === 'Warning Area';
-    });
     this.areaFeatures = this.everything.append('g');
     this.areaFeatures
       .selectAll('path')
@@ -156,17 +196,9 @@ class Map extends React.Component {
       .attr('d', this.path)
       .style('fill', fill);
 
-    this.centerArea = props.data.features.filter(f => f.properties.areatype === 'Likely Tracks Area')[0];
-    if (!this.centerArea) {
-      this.centerArea = props.data.features.filter(f => f.properties.tracktype === 'Observed')[0];
-    }
+    this.places = this.everything.append('g');
 
-    const cities = this.getCities(props);
-    this.places = this.everything.append('g').attr('class', styles.features);
-
-    const cycloneData = data.filter(f => {
-      return f.properties.symbol === 'Cyclone' && f.properties.fixType === 'Current';
-    });
+    // Give the current cyclone a swirling wind
     this.images = this.everything.append('g');
     this.images
       .selectAll('image')
@@ -178,28 +210,14 @@ class Map extends React.Component {
       .attr('href', d => cycloneImages[d.properties.category]);
 
     // Render the weather stuff
-    const weatherData = data.filter(f => {
-      return (
-        f.properties.areatype !== 'Watch Area' && f.properties.areatype !== 'Warning Area' && !f.properties.fixType
-      );
-    });
-    const fixData = data.filter(f => {
-      return f.properties.fixType;
-    });
-
-    this.features = this.everything.append('g').attr('class', styles.features);
+    this.features = this.everything.append('g');
     this.features
       .selectAll('path')
       .data(weatherData)
       .enter()
       .append('path')
       .attr('d', this.path)
-      .attr('class', d => {
-        if (d.properties.tracktype) {
-          return styles.track;
-        }
-        return '';
-      })
+      .attr('class', d => (d.properties.tracktype ? styles.track : ''))
       .style('stroke', stroke)
       .style('stroke-width', 2)
       .style('fill', fill)
@@ -210,7 +228,6 @@ class Map extends React.Component {
       .enter()
       .append('g')
       .attr('class', 'dot');
-
     this.dots
       .append('circle')
       .attr('r', 12)
@@ -218,7 +235,6 @@ class Map extends React.Component {
       .attr('stroke', stroke)
       .attr('cx', d => d.x)
       .attr('cy', d => d.y);
-
     this.dots
       .append('text')
       .attr('font-family', SANS_SERIF_FONT)
@@ -249,7 +265,8 @@ class Map extends React.Component {
   updateGraph(props, willTransition) {
     transition = typeof transition === 'undefined' ? true : transition;
 
-    const factor = 1 / (props.zoom || 1);
+    let factor = 1 / (props.zoom || 1);
+    let zoom = props.zoom;
 
     this.width = props.width || window.innerWidth;
     this.height = props.height || window.innerHeight;
@@ -258,7 +275,6 @@ class Map extends React.Component {
       .attr('width', this.width)
       .attr('height', this.height)
       .style('background', '#efefef');
-
     this.svg
       .select('#uncertainty' + this.key)
       .transition()
@@ -272,30 +288,36 @@ class Map extends React.Component {
       .attr('r', 2 * factor)
       .attr('transform', `translate(${1 * factor},${1 * factor})`);
 
+    const { data, areaData, cycloneData, weatherData, fixData, centerArea } = this.processData(props);
+    this.centerArea = centerArea;
+
     // Work out where the center of the map is
-    this.centerArea = props.data.features.filter(f => f.properties.areatype === 'Likely Tracks Area')[0];
-    if (!this.centerArea) {
-      this.centerArea = props.data.features.filter(f => f.properties.tracktype === 'Observed')[0];
-    }
-
     let center;
-    if (props.center === 'current') {
-      const current = props.data.features.filter(f => f.properties.fixType === 'Current')[0];
-      if (current) {
-        center = this.path.centroid(current);
+    if (data.length > 0) {
+      if (props.center === 'current') {
+        const current = props.data.features.filter(f => f.properties.fixType === 'Current')[0];
+        if (current) {
+          center = this.path.centroid(current);
+        }
+      } else if (props.center !== '') {
+        const city = citiesJSON.features.filter(f => f.properties.name.toLowerCase() === props.center.toLowerCase())[0];
+        if (city) {
+          center = this.path.centroid(city);
+        }
       }
-    } else if (props.center !== '') {
-      const city = citiesJSON.features.filter(f => f.properties.name.toLowerCase() === props.center.toLowerCase())[0];
-      if (city) {
-        center = this.path.centroid(city);
+    }
+    if (!center) {
+      if (this.centerArea) {
+        center = this.path.centroid(this.centerArea);
+      } else {
+        center = this.path.centroid({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[136, -27]] } });
+        zoom = 1;
+        factor = 1;
       }
-    } else {
-      center = this.path.centroid(this.centerArea);
     }
 
-    const transform = `translate(${this.width / 2}, ${this.height / 2}) scale(${
-      props.zoom
-    }) translate(${-center[0]}, ${-center[1]})`;
+    const transform = `translate(${this.width / 2}, ${this.height /
+      2}) scale(${zoom}) translate(${-center[0]}, ${-center[1]})`;
     if (willTransition) {
       this.everything
         .transition()
@@ -307,20 +329,14 @@ class Map extends React.Component {
 
     this.mapFeatures.attr('d', this.path).style('stroke-width', 1 * factor);
 
-    // Work out the cyclone information
-    const data = this.processData(props);
-
     // Render the warning areas
-    const areaData = data.filter(f => {
-      return f.properties.areatype === 'Watch Area' || f.properties.areatype === 'Warning Area';
-    });
-
     this.areaFeatures
       .selectAll('path')
       .data(areaData)
       .attr('d', this.path);
 
     // Render place dots and names
+    // These need to tashed and re-added because they might all completely change
     const cities = this.getCities(props);
     this.places.selectAll('path').remove();
     this.places
@@ -351,9 +367,6 @@ class Map extends React.Component {
       .attr('font-size', 12 * factor);
 
     // Give the current cyclone (if there is one) a spinning animation
-    const cycloneData = data.filter(f => {
-      return f.properties.symbol === 'Cyclone' && f.properties.fixType === 'Current';
-    });
     const cycloneSize = 60 * factor;
     this.images
       .selectAll('image')
@@ -367,9 +380,6 @@ class Map extends React.Component {
       .attr('height', cycloneSize);
 
     // Render the weather stuff
-    const weatherData = data.filter(f => {
-      return f.properties.areatype !== 'Watch Area' && f.properties.areatype !== 'Warning Area';
-    });
     this.features
       .selectAll('path')
       .data(weatherData)
@@ -382,12 +392,7 @@ class Map extends React.Component {
           return `${10 * factor} ${4 * factor}`;
         }
       });
-
-    const fixData = data.filter(f => {
-      return f.properties.fixType;
-    });
     this.dots.data(fixData);
-
     this.dots
       .selectAll('circle')
       .transition()
