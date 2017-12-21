@@ -6,12 +6,12 @@
 
 .track {
   stroke-dashoffset: 0;
-  stroke-dasharray: 15 5;
-  animation: marching 1s linear infinite;
+  stroke-dasharray: 5 2;
+  animation: marching 1.8s linear infinite;
 }
 
 @keyframes marching {
   to {
-    stroke-dashoffset: -20;
+    stroke-dashoffset: -7;
   }
 }

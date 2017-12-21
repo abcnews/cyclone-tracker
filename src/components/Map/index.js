@@ -61,7 +61,7 @@ class Map extends React.Component {
 
   getCities(props) {
     const factor = 1 / (props.zoom || 1);
-    const distance = 40 / factor;
+    const distance = 40 * factor;
 
     const bounds = this.path.bounds(this.centerArea);
     return citiesJSON.features
@@ -121,14 +121,13 @@ class Map extends React.Component {
       .append('defs')
       .append('pattern')
       .attr('id', 'uncertainty' + this.key)
-      .attr('width', '6')
-      .attr('height', '8')
+      .attr('width', '1')
+      .attr('height', '1')
       .attr('patternUnits', 'userSpaceOnUse')
       .attr('patternTransform', 'rotate(80)')
-      .append('rect')
-      .attr('width', '2')
-      .attr('height', '8')
-      .attr('transform', 'translate(0,0)')
+      .append('circle')
+      .attr('r', '1')
+      .attr('transform', 'translate(1,1)')
       .attr('fill', '#555');
 
     this.everything = this.svg.append('g').attr('class', 'everything');
@@ -264,14 +263,14 @@ class Map extends React.Component {
       .select('#uncertainty' + this.key)
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('width', 12 * factor)
-      .attr('height', 16 * factor);
+      .attr('width', 8 * factor)
+      .attr('height', 8 * factor);
     this.svg
-      .select('#uncertainty' + this.key + ' rect')
+      .select('#uncertainty' + this.key + ' circle')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('width', 4 * factor)
-      .attr('height', 16 * factor);
+      .attr('r', 2 * factor)
+      .attr('transform', `translate(${1 * factor},${1 * factor})`);
 
     // Work out where the center of the map is
     this.centerArea = props.data.features.filter(f => f.properties.areatype === 'Likely Tracks Area')[0];
@@ -280,19 +279,17 @@ class Map extends React.Component {
     }
 
     let center;
-    if (props.centerOnCurrent) {
+    if (props.center === 'current') {
       const current = props.data.features.filter(f => f.properties.fixType === 'Current')[0];
       if (current) {
         center = this.path.centroid(current);
       }
-    } else if (props.city) {
-      const city = citiesJSON.features.filter(f => f.properties.name.toLowerCase() === props.city.toLowerCase())[0];
+    } else if (props.center !== '') {
+      const city = citiesJSON.features.filter(f => f.properties.name.toLowerCase() === props.center.toLowerCase())[0];
       if (city) {
         center = this.path.centroid(city);
       }
-    }
-
-    if (!center) {
+    } else {
       center = this.path.centroid(this.centerArea);
     }
 
@@ -379,7 +376,12 @@ class Map extends React.Component {
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('d', this.path)
-      .style('stroke-width', 2 * factor);
+      .style('stroke-width', 2 * factor)
+      .style('stroke-dasharray', d => {
+        if (d.properties.tracktype) {
+          return `${10 * factor} ${4 * factor}`;
+        }
+      });
 
     const fixData = data.filter(f => {
       return f.properties.fixType;
