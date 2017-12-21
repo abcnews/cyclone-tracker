@@ -12,10 +12,15 @@ function init() {
     if (root.getAttribute('data-url').indexOf('.json') > -1) {
       // Find the latest cyclone (if there is one)
       d3.json('/example-cyclones.json', (err, json) => {
-        // TODO: load the json file that comes back (currently there are no cyclones in it)
-        console.log('json', json);
-
-        render(<App index={index} />, root);
+        // TODO: load more than 1 cyclone if possible
+        if (json.cyclones.length > 0) {
+          d3.xml(json.cyclones[0].path, (err, xml) => {
+            const data = GML.parse(xml);
+            render(<App data={data} index={index} />, root);
+          });
+        } else {
+          render(<App index={index} />, root);
+        }
       });
     } else {
       // Load in the specific cyclone

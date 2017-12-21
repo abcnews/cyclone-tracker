@@ -105,7 +105,7 @@ class Map extends React.Component {
     if (!this.centerArea) return [];
 
     const factor = 1 / (props.zoom || 1);
-    const distance = 40 * factor;
+    const distance = 40;
 
     const bounds = this.path.bounds(this.centerArea);
     return citiesJSON.features

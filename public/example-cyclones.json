@@ -1,4 +1,11 @@
 {
   "updated": "2017-12-21 11:25:10 +1100",
-  "cyclones": []
+  "cyclones": [
+    {
+      "path": "example-ex-tc.gml",
+      "name": "Ex-TC",
+      "date": "",
+      "expriyHrs": "2"
+    }
+  ]
 }
