@@ -11,10 +11,17 @@ function init() {
   [].slice.call(document.querySelectorAll(`[data-${PROJECT_NAME}-root]`)).forEach((root, index) => {
     if (root.getAttribute('data-url').indexOf('.json') > -1) {
       // Find the latest cyclone (if there is one)
-      d3.json('/example-cyclones.json', (err, json) => {
+      d3.json(root.getAttribute('data-url'), (err, json) => {
+        // Get the path where the json file was loaded to see where the GML files are
+        const baseURL = root
+          .getAttribute('data-url')
+          .split('/')
+          .slice(0, -1)
+          .join('/');
+
         // TODO: load more than 1 cyclone if possible
         if (json.cyclones.length > 0) {
-          d3.xml(json.cyclones[0].path, (err, xml) => {
+          d3.xml(baseURL + '/' + json.cyclones[0].path, (err, xml) => {
             const data = GML.parse(xml);
             render(<App data={data} index={index} />, root);
           });

@@ -45,20 +45,20 @@ function fill(d) {
     if (d.properties.fixType === 'Observed') {
       return '#666';
     } else if (d.properties.symbol === 'Low') {
-      return '#00a8ab';
+      return '#85D0D9';
     } else {
       switch (d.properties.category) {
         default:
         case '1':
-          return '#5fa800';
+          return '#FFCC8B';
         case '2':
-          return '#a0a300';
+          return '#FF8C63';
         case '3':
-          return '#c78800';
+          return '#FF5D48';
         case '4':
-          return '#d65200';
+          return '#D60D4C';
         case '5':
-          return '#db0243';
+          return '#760040';
       }
     }
   }

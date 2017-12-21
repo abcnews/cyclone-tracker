@@ -51,10 +51,11 @@ class Map extends React.Component {
     let cycloneData = [];
     let weatherData = [];
     let fixData = [];
+    let area = null;
     let centerArea = null;
 
     if (!props.data || !props.data.features)
-      return { data: [], areaData, cycloneData, weatherData, fixData, centerArea };
+      return { data: [], areaData, cycloneData, weatherData, fixData, area, centerArea };
 
     const data = props.data.features.map(f => {
       f.uncertaintyKey = this.key;
@@ -64,6 +65,7 @@ class Map extends React.Component {
     });
 
     let fallbackCenterArea;
+    let forecastLine;
     data.forEach(d => {
       if (d.properties.areatype === 'Watch Area' || d.properties.areatype === 'Warning Area') {
         areaData.push(d);
@@ -87,24 +89,45 @@ class Map extends React.Component {
       if (d.properties.tracktype === 'Observed') {
         fallbackCenterArea = d;
       }
+      if (d.properties.tracktype === 'Forecast') {
+        forecastLine = d;
+      }
     });
 
-    // If there is no likely tracks, just use the observed area
-    if (!centerArea.properties) {
+    area = [fallbackCenterArea, forecastLine, centerArea].filter(a => a).reduce(
+      (line, current) => {
+        const coordinates =
+          current.geometry.coordinates[0][0] instanceof Array
+            ? current.geometry.coordinates[0]
+            : current.geometry.coordinates;
+        line.geometry.coordinates = line.geometry.coordinates.concat(coordinates);
+        return line;
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: []
+        }
+      }
+    );
+
+    // If there are no likely tracks, just use the observed area
+    if (!centerArea) {
       centerArea = fallbackCenterArea;
     }
 
-    return { data, areaData, cycloneData, weatherData, fixData, centerArea };
+    return { data, areaData, cycloneData, weatherData, fixData, area, centerArea };
   }
 
   onResize() {
     this.updateGraph(this.props);
   }
 
-  getCities(props) {
+  getCities(props, zoom) {
     if (!this.centerArea) return [];
 
-    const factor = 1 / (props.zoom || 1);
+    const factor = 1 / (zoom || props.zoom || 1);
     const distance = 40;
 
     const bounds = this.path.bounds(this.centerArea);
@@ -172,6 +195,11 @@ class Map extends React.Component {
       .attr('r', '1')
       .attr('transform', 'translate(1,1)')
       .attr('fill', '#555');
+    this.svg.append('style').text(`@keyframes marching {
+      to {
+        stroke-dashoffset: -14;
+      }
+    }`);
 
     this.everything = this.svg.append('g');
 
@@ -217,7 +245,14 @@ class Map extends React.Component {
       .enter()
       .append('path')
       .attr('d', this.path)
-      .attr('class', d => (d.properties.tracktype ? styles.track : ''))
+      .attr('class', d => {
+        if (d.properties.tracktype === 'Forecast') {
+          return styles.track;
+        } else if (d.properties.tracktype === 'Observed') {
+          return styles.track;
+        }
+        return '';
+      })
       .style('stroke', stroke)
       .style('stroke-width', 2)
       .style('fill', fill)
@@ -255,6 +290,18 @@ class Map extends React.Component {
           }
         }
       });
+
+    this.width = props.width || window.innerWidth;
+    this.height = props.height || window.innerHeight;
+
+    this.svg
+      .append('text')
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-size', 10)
+      .attr('x', this.width - 12)
+      .attr('y', this.height - 12)
+      .attr('text-anchor', 'end')
+      .text('Source: Bureau of Meteorology');
   }
 
   /**
@@ -263,13 +310,20 @@ class Map extends React.Component {
    * @param {boolean?} willTransition
    */
   updateGraph(props, willTransition) {
-    transition = typeof transition === 'undefined' ? true : transition;
+    willTtransition = typeof willTtransition === 'undefined' ? true : willTtransition;
 
-    let factor = 1 / (props.zoom || 1);
-    let zoom = props.zoom;
+    const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
 
     this.width = props.width || window.innerWidth;
     this.height = props.height || window.innerHeight;
+
+    let zoom = props.zoom;
+    if (!zoom) {
+      var b = this.path.bounds(area);
+      zoom = 0.8 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
+    }
+
+    let factor = 1 / (zoom || 1);
 
     this.svg
       .attr('width', this.width)
@@ -279,16 +333,20 @@ class Map extends React.Component {
       .select('#uncertainty' + this.key)
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('width', 8 * factor)
-      .attr('height', 8 * factor);
+      .attr('width', 6 * factor)
+      .attr('height', 6 * factor);
     this.svg
       .select('#uncertainty' + this.key + ' circle')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('r', 2 * factor)
-      .attr('transform', `translate(${1 * factor},${1 * factor})`);
+      .attr('r', 1.7 * factor)
+      .attr('transform', `translate(${1.7 * factor},${1.7 * factor})`);
+    this.svg.select('style').text(`@keyframes marching {
+        to {
+          stroke-dashoffset: -${14 * factor};
+        }
+      }`);
 
-    const { data, areaData, cycloneData, weatherData, fixData, centerArea } = this.processData(props);
     this.centerArea = centerArea;
 
     // Work out where the center of the map is
@@ -307,8 +365,8 @@ class Map extends React.Component {
       }
     }
     if (!center) {
-      if (this.centerArea) {
-        center = this.path.centroid(this.centerArea);
+      if (area) {
+        center = this.path.centroid(area);
       } else {
         center = this.path.centroid({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[136, -27]] } });
         zoom = 1;
@@ -337,7 +395,7 @@ class Map extends React.Component {
 
     // Render place dots and names
     // These need to tashed and re-added because they might all completely change
-    const cities = this.getCities(props);
+    const cities = this.getCities(props, zoom);
     this.places.selectAll('path').remove();
     this.places
       .selectAll('path')
@@ -373,6 +431,7 @@ class Map extends React.Component {
       .data(cycloneData)
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
+      .style('opacity', 0.5)
       .attr('href', d => cycloneImages[d.properties.category])
       .attr('x', d => d.x - cycloneSize / 2)
       .attr('y', d => d.y - cycloneSize / 2)
@@ -388,10 +447,13 @@ class Map extends React.Component {
       .attr('d', this.path)
       .style('stroke-width', 2 * factor)
       .style('stroke-dasharray', d => {
-        if (d.properties.tracktype) {
+        if (d.properties.tracktype === 'Forecast') {
           return `${10 * factor} ${4 * factor}`;
+        } else if (d.properties.tracktype) {
+          return `${13 * factor} ${1 * factor}`;
         }
-      });
+      })
+      .style('animation', 'marching 1.8s linear infinite');
     this.dots.data(fixData);
     this.dots
       .selectAll('circle')
