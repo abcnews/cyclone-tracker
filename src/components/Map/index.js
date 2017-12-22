@@ -232,6 +232,9 @@ class Map extends React.Component {
       })
       .on('mouseup', () => {
         dragStart = null;
+      })
+      .on('mouseleave', () => {
+        dragStart = null;
       });
 
     this.everything = this.svg.append('g');
@@ -499,17 +502,23 @@ class Map extends React.Component {
       .selectAll('circle')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('r', 12 * factor)
+      .attr('r', d => {
+        if (d.properties.fixType === 'Observed') {
+          return 10 * factor;
+        }
+        return 12 * factor;
+      })
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
       .attr('stroke-width', 2 * factor);
+
     this.dots
       .selectAll('text')
-      .data(data)
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('font-size', 14 * factor)
-      .attr('dy', 4 * factor);
+      .attr('font-size', d => (d.properties.fixType === 'Observed' ? 10 : 14) * factor)
+      .attr('dy', d => (d.properties.fixType === 'Observed' ? 3 : 4) * factor)
+      .style('pointer-events', 'none');
   }
 
   render() {

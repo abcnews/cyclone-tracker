@@ -1,3 +1,5 @@
+const tinycolor = require('tinycolor2');
+
 const cycloneImages = {
   '1': require('./cyclone-1.svg'),
   '2': require('./cyclone-2.svg'),
@@ -42,25 +44,38 @@ function fill(d) {
         return '#ff9255';
     }
   } else if (d.properties.symbol) {
-    if (d.properties.fixType === 'Observed') {
-      return '#666';
-    } else if (d.properties.symbol === 'Low') {
-      return '#85D0D9';
+    let colour;
+
+    if (d.properties.symbol === 'Low') {
+      colour = '#85D0D9';
     } else {
       switch (d.properties.category) {
         default:
         case '1':
-          return '#FFCC8B';
+          colour = '#FFCC8B';
+          break;
         case '2':
-          return '#FF8C63';
+          colour = '#FF8C63';
+          break;
         case '3':
-          return '#FF5D48';
+          colour = '#FF5D48';
+          break;
         case '4':
-          return '#D60D4C';
+          colour = '#D60D4C';
+          break;
         case '5':
-          return '#760040';
+          colour = '#760040';
+          break;
       }
     }
+
+    if (d.properties.fixType === 'Observed') {
+      colour = tinycolor(colour)
+        .desaturate(30)
+        .toString();
+    }
+
+    return colour;
   }
 
   return 'transparent';
