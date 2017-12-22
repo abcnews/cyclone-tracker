@@ -257,8 +257,6 @@ class Map extends React.Component {
       .attr('d', this.path)
       .style('fill', fill);
 
-    this.places = this.everything.append('g');
-
     // Give the current cyclone a swirling wind
     this.images = this.everything.append('g');
     this.images
@@ -290,7 +288,11 @@ class Map extends React.Component {
       .style('stroke-width', 2)
       .style('fill', fill)
       .style('opacity', d => (d.properties.areatype === 'Likely Tracks Area' ? 0.3 : 1));
-    this.dots = this.features
+
+    this.places = this.everything.append('g');
+
+    this.fixes = this.everything.append('g');
+    this.dots = this.fixes
       .selectAll('g.dot')
       .data(fixData)
       .enter()
@@ -430,7 +432,7 @@ class Map extends React.Component {
       .attr('d', this.path);
 
     // Render place dots and names
-    // These need to tashed and re-added because they might all completely change
+    // These need to be trashed and re-added because they might all completely change
     const cities = this.getCities(props, zoom);
     this.places.selectAll('path').remove();
     this.places
@@ -445,9 +447,9 @@ class Map extends React.Component {
           .projection(this.projection)
           .pointRadius(3 * factor)
       )
-      .attr('fill', 'transparent')
+      .attr('fill', 'white')
       .attr('stroke', 'black')
-      .attr('stroke-width', 1 * factor);
+      .attr('stroke-width', 1.5 * factor);
     this.places.selectAll('text').remove();
     this.places
       .selectAll('text')
@@ -457,8 +459,10 @@ class Map extends React.Component {
       .attr('x', d => d.x)
       .attr('y', d => d.y)
       .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-weight', 'bold')
       .text(d => d.properties.name)
-      .attr('font-size', 12 * factor);
+      .attr('font-size', 12 * factor)
+      .style('pointer-events', 'none');
 
     // Give the current cyclone (if there is one) a spinning animation
     const cycloneSize = 60 * factor;
