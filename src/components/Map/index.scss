@@ -3,14 +3,4 @@
 
 .track {
   stroke-dashoffset: 0;
-  // stroke-dasharray: 5 2;
-  // animation: marching 1.8s linear infinite;
 }
-
-/* Maybe turn this into a d3 tag and writes its innerText on zoom change */
-
-// @keyframes marching {
-//   to {
-//     stroke-dashoffset: -14;
-//   }
-// }

@@ -1,5 +1,6 @@
 const React = require('react');
 const d3 = require('../../d3');
+const select = require('d3-selection');
 const TopoJSON = require('topojson');
 
 const styles = require('./index.scss');
@@ -16,7 +17,7 @@ class Map extends React.Component {
   constructor(props) {
     super(props);
 
-    this.key = props.index || Math.floor(Math.random * 100000).toString();
+    this.key = props.index || Math.floor(Math.random() * 100000).toString();
     this.processData = this.processData.bind(this);
 
     this.getCities = this.getCities.bind(this);
@@ -201,6 +202,38 @@ class Map extends React.Component {
       }
     }`);
 
+    // Drag around the map
+    let dragStart = null;
+    let centerDragStart = null;
+    this.svg
+      .on('mousedown', () => {
+        dragStart = {
+          x: select.event.clientX,
+          y: select.event.clientY
+        };
+        centerDragStart = {
+          x: this.center[0],
+          y: this.center[1]
+        };
+      })
+      .on('mousemove', () => {
+        if (!dragStart) return;
+
+        this.center = [
+          centerDragStart.x + (dragStart.x - select.event.clientX) / this.zoom,
+          centerDragStart.y + (dragStart.y - select.event.clientY) / this.zoom
+        ];
+
+        this.everything.attr(
+          'transform',
+          `translate(${this.width / 2}, ${this.height / 2}) scale(${this.zoom}) translate(${-this.center[0]}, ${-this
+            .center[1]})`
+        );
+      })
+      .on('mouseup', () => {
+        dragStart = null;
+      });
+
     this.everything = this.svg.append('g');
 
     this.mapFeatures = this.everything.append('g');
@@ -322,6 +355,7 @@ class Map extends React.Component {
       var b = this.path.bounds(area);
       zoom = 0.8 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
     }
+    this.zoom = zoom;
 
     let factor = 1 / (zoom || 1);
 
@@ -373,9 +407,11 @@ class Map extends React.Component {
         factor = 1;
       }
     }
+    this.center = center;
 
     const transform = `translate(${this.width / 2}, ${this.height /
       2}) scale(${zoom}) translate(${-center[0]}, ${-center[1]})`;
+
     if (willTransition) {
       this.everything
         .transition()
