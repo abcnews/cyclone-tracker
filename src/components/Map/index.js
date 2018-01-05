@@ -95,6 +95,7 @@ class Map extends React.Component {
       }
     });
 
+    // TODO: change this to focus on the forecast area
     area = [fallbackCenterArea, forecastLine, centerArea].filter(a => a).reduce(
       (line, current) => {
         const coordinates =
@@ -206,22 +207,26 @@ class Map extends React.Component {
     let dragStart = null;
     let centerDragStart = null;
     this.svg
-      .on('mousedown', () => {
+      .on('mousedown touchstart', () => {
+        const e = select.event.touches ? select.event.touches[0] : select.event;
+
         dragStart = {
-          x: select.event.clientX,
-          y: select.event.clientY
+          x: e.clientX,
+          y: e.clientY
         };
         centerDragStart = {
           x: this.center[0],
           y: this.center[1]
         };
       })
-      .on('mousemove', () => {
+      .on('mousemove touchmove', () => {
         if (!dragStart) return;
 
+        const e = select.event.touches ? select.event.touches[0] : select.event;
+
         this.center = [
-          centerDragStart.x + (dragStart.x - select.event.clientX) / this.zoom,
-          centerDragStart.y + (dragStart.y - select.event.clientY) / this.zoom
+          centerDragStart.x + (dragStart.x - e.clientX) / this.zoom,
+          centerDragStart.y + (dragStart.y - e.clientY) / this.zoom
         ];
 
         this.everything.attr(
@@ -230,7 +235,7 @@ class Map extends React.Component {
             .center[1]})`
         );
       })
-      .on('mouseup', () => {
+      .on('mouseup touchend', () => {
         dragStart = null;
       })
       .on('mouseleave', () => {
