@@ -15,12 +15,12 @@ class App extends React.Component {
   }
 
   render() {
+    //<button onClick={e => this.setState(state => ({ zoom: null, center: '' }))}>Default</button>
+
     return (
       <div className={styles.base}>
         <Map data={this.props.data} zoom={this.state.zoom} index={this.props.index} center={this.state.center} />
         <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
-          <button onClick={e => this.setState(state => ({ zoom: null, center: '' }))}>Default</button>
-          &nbsp;
           <button onClick={e => this.setState(state => ({ zoom: 1 }))}>1</button>
           <button onClick={e => this.setState(state => ({ zoom: 2 }))}>2</button>
           <button onClick={e => this.setState(state => ({ zoom: 4 }))}>3</button>

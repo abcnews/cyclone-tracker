@@ -3,6 +3,7 @@ const format = require('date-fns/format');
 const d3 = require('../../d3');
 const select = require('d3-selection');
 const TopoJSON = require('topojson');
+const tinycolor = require('tinycolor2');
 
 const styles = require('./index.scss');
 const mapJSON = require('./australia.topo.json');
@@ -11,6 +12,8 @@ const citiesJSON = require('./cities.topo.json');
 const SERIF_FONT = 'ABCSerif,Book Antiqua,Palatino Linotype,Palatino,serif';
 const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
 const TRANSITION_DURATION = 600;
+
+const BALLOON_HEIGHT = 115;
 
 const { cycloneImages, stroke, fill } = require('./util');
 
@@ -30,7 +33,8 @@ class Map extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.updateGraph(nextProps, true);
+    const recenter = nextProps.center !== this.props.center || nextProps.center === '';
+    this.updateGraph(nextProps, true, recenter);
   }
 
   shouldComponentUpdate() {
@@ -59,7 +63,8 @@ class Map extends React.Component {
     if (!props.data || !props.data.features)
       return { data: [], areaData, cycloneData, weatherData, fixData, area, centerArea };
 
-    const data = props.data.features.map(f => {
+    const data = props.data.features.map((f, index) => {
+      f.index = index;
       f.uncertaintyKey = this.key;
       f.x = this.path.centroid(f)[0];
       f.y = this.path.centroid(f)[1];
@@ -310,7 +315,12 @@ class Map extends React.Component {
       .data(fixData)
       .enter()
       .append('g')
-      .attr('class', 'dot');
+      .attr('class', 'dot')
+      .on('click', d => {
+        this.popupIndex = d.index;
+        this.center = [d.x, d.y];
+        this.updateGraph(this.props, true, false);
+      });
 
     this.dots
       .append('rect')
@@ -353,6 +363,80 @@ class Map extends React.Component {
         }
       });
 
+    // Popup balloons
+    this.balloons = this.fixes
+      .selectAll('g.balloons')
+      .data(fixData)
+      .enter()
+      .append('g')
+      .attr('class', 'popup')
+      .attr('fill', 'white');
+    // .attr('transform', d => `translate(${d.x - 100}, ${d.y - BALLOON_HEIGHT + 20})`);
+    this.balloons
+      .append('polygon')
+      .attr('points', '0,0 10,20, 20,0')
+      .attr('transform', `translate(90, ${BALLOON_HEIGHT - 11})`);
+    this.balloons
+      .append('rect')
+      .attr('fill', 'white')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('rx', 5)
+      .attr('ry', 5)
+      .attr('width', 200)
+      .attr('height', BALLOON_HEIGHT - 10);
+    this.balloons
+      .append('text')
+      .attr('font-size', 14)
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('fill', '#222')
+      .attr('font-weight', 'bold')
+      .attr('text-anchor', 'middle')
+      .attr('x', 100)
+      .attr('y', 20)
+      .text(d => d.properties.fixtype.toUpperCase());
+    this.balloons
+      .append('text')
+      .attr('font-size', 14)
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('fill', '#222')
+      .attr('text-anchor', 'middle')
+      .attr('x', 100)
+      .attr('y', 40)
+      .text(d => format(d.properties.fixtime, 'ddd D MMM'));
+    this.balloons
+      .append('text')
+      .attr('font-size', 14)
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('fill', '#222')
+      .attr('text-anchor', 'middle')
+      .attr('x', 100)
+      .attr('y', 60)
+      .text(d => format(d.properties.fixtime, 'h:mmA'));
+    this.balloons
+      .append('text')
+      .attr('font-size', 16)
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-weight', 'bold')
+      .attr('fill', d => {
+        return tinycolor(fill(d))
+          .darken(20)
+          .toString();
+      })
+      .attr('text-anchor', 'middle')
+      .attr('x', 100)
+      .attr('y', 90)
+      .text(d => {
+        if (d.properties.symbol) {
+          switch (d.properties.symbol) {
+            case 'Low':
+              return 'TROPICAL LOW';
+            case 'Cyclone':
+              return 'CATEGORY ' + d.properties.category;
+          }
+        }
+      });
+
     this.width = props.width || window.innerWidth;
     this.height = props.height || window.innerHeight;
 
@@ -371,7 +455,7 @@ class Map extends React.Component {
    * @param {object} props
    * @param {boolean?} willTransition
    */
-  updateGraph(props, willTransition) {
+  updateGraph(props, willTransition, recenter) {
     willTtransition = typeof willTtransition === 'undefined' ? true : willTtransition;
 
     const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
@@ -412,34 +496,40 @@ class Map extends React.Component {
 
     this.centerArea = centerArea;
 
-    // Work out where the center of the map is
-    let center;
-    if (data.length > 0) {
-      if (props.center === 'current') {
-        const current = props.data.features.filter(f => f.properties.fixtype === 'Current')[0];
-        if (current) {
-          center = this.path.centroid(current);
-        }
-      } else if (props.center !== '') {
-        const city = citiesJSON.features.filter(f => f.properties.name.toLowerCase() === props.center.toLowerCase())[0];
-        if (city) {
-          center = this.path.centroid(city);
-        }
-      }
-    }
-    if (!center) {
-      if (area) {
-        center = this.path.centroid(area);
-      } else {
-        center = this.path.centroid({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[136, -27]] } });
-        zoom = 1;
-        factor = 1;
-      }
-    }
-    this.center = center;
+    console.log('RECENTER?', recenter, props.center);
 
-    const transform = `translate(${this.width / 2}, ${this.height /
-      2}) scale(${zoom}) translate(${-center[0]}, ${-center[1]})`;
+    // Work out where the center of the map is
+    if (!this.center || recenter) {
+      let center;
+      if (data.length > 0) {
+        if (props.center === 'current') {
+          const current = props.data.features.filter(f => f.properties.fixtype === 'Current')[0];
+          if (current) {
+            center = this.path.centroid(current);
+          }
+        } else if (props.center !== '') {
+          const city = citiesJSON.features.filter(
+            f => f.properties.name.toLowerCase() === props.center.toLowerCase()
+          )[0];
+          if (city) {
+            center = this.path.centroid(city);
+          }
+        }
+      }
+      if (!center) {
+        if (area) {
+          center = this.path.centroid(area);
+        } else {
+          center = this.path.centroid({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[136, -27]] } });
+          zoom = 1;
+          factor = 1;
+        }
+      }
+      this.center = center;
+    }
+
+    const transform = `translate(${this.width / 2}, ${this.height / 2}) scale(${zoom}) translate(${-this
+      .center[0]}, ${-this.center[1]})`;
 
     if (willTransition) {
       this.everything
@@ -567,6 +657,15 @@ class Map extends React.Component {
       .attr('font-size', d => (d.properties.fixtype === 'Observed' ? 10 : 14) * factor)
       .attr('dy', d => (d.properties.fixtype === 'Observed' ? 3 : 4) * factor)
       .style('pointer-events', 'none');
+
+    this.balloons
+      // .transition()
+      // .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('transform', d => {
+        const scale = this.popupIndex === d.index ? 1 / this.zoom : 0.01;
+        return `translate(${d.x - 100 * factor}, ${d.y - (BALLOON_HEIGHT + 17) * factor}) scale(${scale})`;
+      })
+      .style('opacity', d => (this.popupIndex === d.index ? 1 : 0));
   }
 
   render() {
