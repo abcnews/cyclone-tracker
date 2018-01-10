@@ -1,4 +1,5 @@
 const React = require('react');
+const format = require('date-fns/format');
 const d3 = require('../../d3');
 const select = require('d3-selection');
 const TopoJSON = require('topojson');
@@ -310,6 +311,19 @@ class Map extends React.Component {
       .enter()
       .append('g')
       .attr('class', 'dot');
+
+    this.dots
+      .append('rect')
+      .attr('class', 'time-rect')
+      .attr('fill', 'white');
+
+    this.dots
+      .append('text')
+      .attr('class', 'time-text')
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-weight', 'bold')
+      .attr('fill', 'black')
+      .attr('text-anchor', 'middle');
     this.dots
       .append('circle')
       .attr('r', 12)
@@ -319,6 +333,7 @@ class Map extends React.Component {
       .attr('cy', d => d.y);
     this.dots
       .append('text')
+      .attr('class', 'letter')
       .attr('font-family', SANS_SERIF_FONT)
       .attr('font-weight', 'bold')
       .attr('font-size', 14)
@@ -345,8 +360,8 @@ class Map extends React.Component {
       .append('text')
       .attr('font-family', SANS_SERIF_FONT)
       .attr('font-size', 10)
-      .attr('x', this.width - 12)
-      .attr('y', this.height - 12)
+      .attr('x', this.width - 20)
+      .attr('y', this.height - 20)
       .attr('text-anchor', 'end')
       .text('Source: Bureau of Meteorology');
   }
@@ -506,7 +521,31 @@ class Map extends React.Component {
         }
       })
       .style('animation', 'marching 1.8s linear infinite');
+
     this.dots.data(fixData);
+
+    this.dots
+      .selectAll('rect.time-rect')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('x', d => d.x)
+      .attr('y', d => d.y - 10 * factor)
+      .attr('rx', 5 * factor)
+      .attr('ry', 5 * factor)
+      .attr('width', 100 * factor)
+      .attr('height', 20 * factor)
+      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
+    this.dots
+      .selectAll('text.time-text')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('font-size', 10 * factor)
+      .attr('dy', 4 * factor)
+      .attr('x', d => d.x + 55 * factor)
+      .attr('y', d => d.y)
+      .text(d => format(d.properties.fixtime, 'ddd D/M hA').toUpperCase())
+      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
+
     this.dots
       .selectAll('circle')
       .transition()
@@ -522,7 +561,7 @@ class Map extends React.Component {
       .attr('stroke-width', 2 * factor);
 
     this.dots
-      .selectAll('text')
+      .selectAll('text.letter')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('font-size', d => (d.properties.fixtype === 'Observed' ? 10 : 14) * factor)

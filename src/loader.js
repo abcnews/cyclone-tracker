@@ -197,6 +197,7 @@ class GML {
 
     // Center in the middle of all of the points
     geo.properties.box = box;
+    geo.properties.currentFix = currentFix;
 
     // BOM specific cyclone naming stuff
     let title = geo.properties.distName;

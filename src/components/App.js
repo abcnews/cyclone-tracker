@@ -1,7 +1,8 @@
 const React = require('react');
+const Map = require('./Map');
+const Legend = require('./Legend');
 
 const styles = require('./App.scss');
-const Map = require('./Map');
 
 class App extends React.Component {
   constructor(props) {
@@ -15,7 +16,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className={styles.root} style={{ position: 'relative' }}>
+      <div className={styles.base}>
         <Map data={this.props.data} zoom={this.state.zoom} index={this.props.index} center={this.state.center} />
         <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
           <button onClick={e => this.setState(state => ({ zoom: null, center: '' }))}>Default</button>
@@ -30,6 +31,7 @@ class App extends React.Component {
           </button>
           <button onClick={e => this.setState(state => ({ center: 'Brisbane' }))}>Brisbane</button>
         </div>
+        <Legend />
       </div>
     );
   }

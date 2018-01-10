@@ -29,6 +29,7 @@
     "d3-request": "^1.0.6",
     "d3-selection": "^1.2.0",
     "d3-transition": "^1.1.1",
+    "date-fns": "^1.29.0",
     "es6-promise": "^4.2.2",
     "lodash": "^4.17.4",
     "object-assign": "^4.1.1",
