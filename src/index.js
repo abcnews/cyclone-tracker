@@ -1,3 +1,5 @@
+require('es6-promise/auto');
+
 const React = require('react');
 const { render } = require('react-dom');
 const d3 = require('./d3');

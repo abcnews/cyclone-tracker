@@ -1,6 +1,6 @@
 const React = require('react');
-const styles = require('./App.scss');
 
+const styles = require('./App.scss');
 const Map = require('./Map');
 
 class App extends React.Component {

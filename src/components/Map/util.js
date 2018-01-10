@@ -35,7 +35,7 @@ function stroke(d) {
     c = colourConfig.stroke[d.properties.tracktype];
   } else if (d.properties.windtype) {
     c = colourConfig.stroke[d.properties.windtype];
-  } else if (d.properties.fixType) {
+  } else if (d.properties.fixtype) {
     c = colourConfig.stroke.fix;
   } else {
     return 'transparent';
@@ -55,7 +55,7 @@ function fill(d) {
     c = colourConfig.fill[d.properties.areatype];
   } else if (d.properties.symbol) {
     let colour = d.properties.symbol === 'Low' ? colourConfig.fill['Low'] : colourConfig.fill[d.properties.category];
-    if (d.properties.fixType === 'Observed') {
+    if (d.properties.fixtype === 'Observed') {
       // Fade out previous observations
       colour = tinycolor(colour)
         .desaturate(30)

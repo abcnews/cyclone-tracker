@@ -16,11 +16,11 @@ class GML {
     if (node.nodeName.toLowerCase().indexOf('coordinates') > -1) return [node];
 
     // if it has no children then its not it
-    if (!node.children) return null;
+    if (!node.childNodes || node.childNodes.length === 0) return null;
 
     // Recursively check the children for tags with coordinates in their name
     let coordinates = [].slice
-      .call(node.children)
+      .call(node.childNodes)
       .map(child => {
         return this.findCoordinatesNodes(child, depth + 1);
       })
@@ -68,9 +68,9 @@ class GML {
   getNodeProperties(node) {
     let properties = {};
 
-    if (!node || !node.children) return properties;
+    if (!node || !node.childNodes || node.childNodes.length === 0) return properties;
 
-    [].slice.call(node.children).forEach(child => {
+    [].slice.call(node.childNodes).forEach(child => {
       if (child.nodeName === 'geometry') return;
       properties[child.nodeName.toLowerCase()] = child.textContent;
     });
@@ -181,8 +181,8 @@ class GML {
           coordinates
         },
         properties: {
-          fixType: node.querySelector('fixType').textContent,
-          fixTime: node.querySelector('fixTime').textContent,
+          fixtype: node.querySelector('fixType').textContent,
+          fixtime: node.querySelector('fixTime').textContent,
           symbol: node.querySelector('symbol').textContent,
           category: node.querySelector('category').textContent || 0
         }
@@ -190,7 +190,7 @@ class GML {
 
       geo.features.push(fix);
 
-      if (fix.properties.fixType === 'Current') {
+      if (fix.properties.fixtype === 'Current') {
         currentFix = fix;
       }
     });

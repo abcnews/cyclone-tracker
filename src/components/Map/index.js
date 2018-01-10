@@ -72,15 +72,19 @@ class Map extends React.Component {
         areaData.push(d);
       }
 
-      if (d.properties.symbol === 'Cyclone' && d.properties.fixType === 'Current') {
+      if (d.properties.symbol === 'Cyclone' && d.properties.fixtype === 'Current') {
         cycloneData.push(d);
       }
 
-      if (d.properties.areatype !== 'Watch Area' && d.properties.areatype !== 'Warning Area' && !d.properties.fixType) {
+      if (
+        d.properties.areatype !== 'Watch Area' &&
+        d.properties.areatype !== 'Warning Area' &&
+        (d.properties.windtype || !d.properties.fixtype)
+      ) {
         weatherData.push(d);
       }
 
-      if (d.properties.fixType) {
+      if (d.properties.fixtype && !d.properties.windtype) {
         fixData.push(d);
       }
 
@@ -397,7 +401,7 @@ class Map extends React.Component {
     let center;
     if (data.length > 0) {
       if (props.center === 'current') {
-        const current = props.data.features.filter(f => f.properties.fixType === 'Current')[0];
+        const current = props.data.features.filter(f => f.properties.fixtype === 'Current')[0];
         if (current) {
           center = this.path.centroid(current);
         }
@@ -508,7 +512,7 @@ class Map extends React.Component {
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('r', d => {
-        if (d.properties.fixType === 'Observed') {
+        if (d.properties.fixtype === 'Observed') {
           return 10 * factor;
         }
         return 12 * factor;
@@ -521,8 +525,8 @@ class Map extends React.Component {
       .selectAll('text')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('font-size', d => (d.properties.fixType === 'Observed' ? 10 : 14) * factor)
-      .attr('dy', d => (d.properties.fixType === 'Observed' ? 3 : 4) * factor)
+      .attr('font-size', d => (d.properties.fixtype === 'Observed' ? 10 : 14) * factor)
+      .attr('dy', d => (d.properties.fixtype === 'Observed' ? 3 : 4) * factor)
       .style('pointer-events', 'none');
   }
 
