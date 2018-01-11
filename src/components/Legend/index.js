@@ -16,6 +16,8 @@ class Legend extends React.Component {
   render() {
     const { data } = this.props;
 
+    if (!data) return <div />;
+
     const baseStyle = {
       transform: this.state.hidden ? `translate(-50%, 90%)` : ''
     };

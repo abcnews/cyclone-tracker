@@ -42,8 +42,10 @@ class Map extends React.Component {
   }
 
   componentDidMount() {
-    this.initGraph(this.props);
-    this.updateGraph(this.props);
+    if (this.props.data) {
+      this.initGraph(this.props);
+      this.updateGraph(this.props, false);
+    }
 
     window.addEventListener('resize', this.onResize);
   }
@@ -476,7 +478,7 @@ class Map extends React.Component {
    * @param {boolean?} willTransition
    */
   updateGraph(props, willTransition, recenter) {
-    willTtransition = typeof willTtransition === 'undefined' ? true : willTtransition;
+    willTransition = typeof willTransition === 'undefined' ? true : willTransition;
 
     const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
 
@@ -484,7 +486,7 @@ class Map extends React.Component {
     this.height = props.height || window.innerHeight;
 
     let zoom = props.zoom;
-    if (!zoom) {
+    if (!zoom && area) {
       var b = this.path.bounds(area);
       zoom = 0.8 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
     }
