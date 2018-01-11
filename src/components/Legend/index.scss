@@ -39,7 +39,7 @@
 }
 
 .section {
-  width: 33.3333333%;
+  flex: 1 0;
   padding: 10px 0 0 10px;
   &:last-of-type {
     padding-right: 10px;
