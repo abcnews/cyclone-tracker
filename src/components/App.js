@@ -16,22 +16,28 @@ class App extends React.Component {
 
   render() {
     //<button onClick={e => this.setState(state => ({ zoom: null, center: '' }))}>Default</button>
+    // <button onClick={e => this.setState(state => ({ center: 'Brisbane' }))}>Brisbane</button>
+
+    // <button onClick={e => this.setState(state => ({ center: (state.center = 'current') }))}>
+    //   Center on current fix
+    // </button>
 
     return (
       <div className={styles.base}>
         <Map data={this.props.data} zoom={this.state.zoom} index={this.props.index} center={this.state.center} />
-        <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
-          <button onClick={e => this.setState(state => ({ zoom: 1 }))}>1</button>
-          <button onClick={e => this.setState(state => ({ zoom: 2 }))}>2</button>
-          <button onClick={e => this.setState(state => ({ zoom: 4 }))}>3</button>
-          <button onClick={e => this.setState(state => ({ zoom: 8 }))}>4</button>
-          &nbsp;
-          <button onClick={e => this.setState(state => ({ center: state.center === '' ? 'current' : '' }))}>
-            Center
+        <div className={styles.toolbar}>
+          <button
+            disabled={this.state.zoom === 8}
+            onClick={e => this.setState(state => ({ zoom: Math.min((state.zoom || 1) * 2, 8) }))}>
+            +
           </button>
-          <button onClick={e => this.setState(state => ({ center: 'Brisbane' }))}>Brisbane</button>
+          <button
+            disabled={this.state.zoom === 1}
+            onClick={e => this.setState(state => ({ zoom: Math.max((state.zoom || 1) / 2, 1) }))}>
+            -
+          </button>
         </div>
-        <Legend />
+        <Legend data={this.props.data} />
       </div>
     );
   }

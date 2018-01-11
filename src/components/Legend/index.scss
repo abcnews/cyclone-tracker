@@ -1,19 +1,63 @@
 .base {
   box-sizing: border-box;
-  padding: 5px;
   position: absolute;
-  top: 5px;
-  right: 10px;
-  width: 200px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 2px;
+  bottom: 10px;
+  max-width: 350px;
+  width: 95%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 3px;
   color: #111;
   font-family: ABCSans, Helvetica, Arial, sans-serif;
   font-size: 13px;
+
+  transition: all 0.3s ease;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.hideIndicator {
+  width: 50px;
+  height: 4px;
+  background: #ccc;
+  border-radius: 2px;
+  margin: 5px auto;
+  cursor: pointer;
+}
+
+.info {
+  display: flex;
+}
+
+.section {
+  width: 33.3333333%;
+  padding: 10px 0 0 10px;
+  &:last-of-type {
+    padding-right: 10px;
+  }
+  font-size: 10px;
+  line-height: 14px;
+  text-transform: uppercase;
+
+  h3 {
+    font-size: 11px;
+    font-weight: normal;
+    margin: 0 0 5px 0;
+    padding: 0;
+  }
+}
+
+.cyclonePath {
+  width: 60px;
+  height: 20px;
 }
 
 .area {
   display: inline-block;
+  vertical-align: baseline;
   width: 10px;
   height: 10px;
   border-radius: 100%;
@@ -23,9 +67,16 @@
 
 .circle {
   display: inline-block;
+  vertical-align: baseline;
   width: 10px;
   height: 10px;
   border: 2px solid black;
   border-radius: 100%;
   margin-right: 5px;
+}
+
+.footer {
+  font-size: 10px;
+  text-align: center;
+  margin: 10px auto 5px auto;
 }

@@ -467,15 +467,6 @@ class Map extends React.Component {
 
     this.width = props.width || window.innerWidth;
     this.height = props.height || window.innerHeight;
-
-    this.svg
-      .append('text')
-      .attr('font-family', SANS_SERIF_FONT)
-      .attr('font-size', 10)
-      .attr('x', this.width - 20)
-      .attr('y', this.height - 20)
-      .attr('text-anchor', 'end')
-      .text('Source: Bureau of Meteorology');
   }
 
   /**
@@ -523,8 +514,6 @@ class Map extends React.Component {
       }`);
 
     this.centerArea = centerArea;
-
-    console.log('RECENTER?', recenter, props.center);
 
     // Work out where the center of the map is
     if (!this.center || recenter) {
