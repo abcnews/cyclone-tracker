@@ -23,7 +23,7 @@ const colourConfig = {
     'Watch Area': '#ffbd55',
     'Warning Area': '#ff9255',
     Low: '#85D0D9',
-    '1': '#FFCC8B', // When modifying cyclone colours, make sure to modify the SVGs as well
+    '1': '#FFCC8B',
     '2': '#FF8C63',
     '3': '#FF5D48',
     '4': '#D60D4C',
