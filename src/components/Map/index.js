@@ -63,11 +63,17 @@ class Map extends React.Component {
     if (!props.data || !props.data.features)
       return { data: [], areaData, cycloneData, weatherData, fixData, area, centerArea };
 
+    let likelyTracksCount = 1;
     const data = props.data.features.map((f, index) => {
       f.index = index;
       f.uncertaintyKey = this.key;
       f.x = this.path.centroid(f)[0];
       f.y = this.path.centroid(f)[1];
+
+      if (f.properties.areatype === 'Likely Tracks Area') {
+        f.likelyTracksIndex = likelyTracksCount++;
+      }
+
       return f;
     });
 
@@ -305,7 +311,13 @@ class Map extends React.Component {
       .style('stroke', stroke)
       .style('stroke-width', 2)
       .style('fill', fill)
-      .style('opacity', d => (d.properties.areatype === 'Likely Tracks Area' ? 0.3 : 1));
+      .style('opacity', d => {
+        // Each likely tracks area fades out slightly more
+        if (d.likelyTracksIndex) {
+          return 0.3 / d.likelyTracksIndex;
+        }
+        return 1;
+      });
 
     this.places = this.everything.append('g');
 

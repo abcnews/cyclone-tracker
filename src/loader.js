@@ -146,12 +146,10 @@ class GML {
       ];
     }
 
-    ['tcWarningArea', 'tcWatchArea', 'tcForecastArea'].forEach(tag => {
-      geo.features.push(this.createPolygon(xml.querySelector(tag)));
-    });
-
-    [].slice.call(xml.querySelectorAll('tcWindArea')).forEach(node => {
-      geo.features.push(this.createPolygon(node));
+    ['tcWarningArea', 'tcWatchArea', 'tcForecastArea', 'tcWindArea'].forEach(tag => {
+      [].slice.call(xml.querySelectorAll(tag)).forEach(node => {
+        geo.features.push(this.createPolygon(node));
+      });
     });
 
     [].slice.call(xml.querySelectorAll('tcTrack')).forEach(node => {
