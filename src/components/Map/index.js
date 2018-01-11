@@ -33,7 +33,7 @@ class Map extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const recenter = nextProps.center !== this.props.center || nextProps.center === '';
+    const recenter = nextProps.center !== this.props.center;
     this.updateGraph(nextProps, true, recenter);
   }
 
