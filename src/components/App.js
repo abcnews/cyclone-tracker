@@ -15,6 +15,8 @@ class App extends React.Component {
   }
 
   render() {
+    //<div className={styles.title}>{this.props.data.properties.title}</div>
+
     //<button onClick={e => this.setState(state => ({ zoom: null, center: '' }))}>Default</button>
     // <button onClick={e => this.setState(state => ({ center: 'Brisbane' }))}>Brisbane</button>
 
@@ -25,6 +27,7 @@ class App extends React.Component {
     return (
       <div className={styles.base}>
         <Map data={this.props.data} zoom={this.state.zoom} index={this.props.index} center={this.state.center} />
+
         <div className={styles.toolbar}>
           <button
             disabled={this.state.zoom === 8}

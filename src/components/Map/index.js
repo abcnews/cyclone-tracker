@@ -438,7 +438,7 @@ class Map extends React.Component {
       .attr('font-weight', 'bold')
       .attr('fill', d => {
         return tinycolor(fill(d))
-          .darken(20)
+          .darken(50)
           .toString();
       })
       .attr('text-anchor', 'middle')
@@ -458,10 +458,11 @@ class Map extends React.Component {
       .append('text')
       .attr('font-size', 14)
       .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-weight', 'bold')
       .attr('fill', '#999')
       .attr('text-anchor', 'end')
       .attr('x', 190)
-      .attr('y', 20)
+      .attr('y', 18)
       .text('x')
       .style('cursor', 'pointer');
 

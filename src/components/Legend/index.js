@@ -23,6 +23,7 @@ class Legend extends React.Component {
     return (
       <div className={styles.base} onClick={e => this.setState(state => ({ hidden: !state.hidden }))} style={baseStyle}>
         <div className={styles.hideIndicator} />
+        <div className={styles.title}>{this.props.data.properties.title}</div>
         <div className={styles.info}>
           <div className={styles.section}>
             <h3>Wind areas</h3>
