@@ -11,7 +11,7 @@ const mapData = TopoJSON.feature(mapJSON, mapJSON.objects.australia).features;
 const citiesJSON = require('./cities.topo.json');
 const SERIF_FONT = 'ABCSerif,Book Antiqua,Palatino Linotype,Palatino,serif';
 const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
-const TRANSITION_DURATION = 600;
+const TRANSITION_DURATION = 400;
 
 const BALLOON_HEIGHT = 115;
 
@@ -332,12 +332,14 @@ class Map extends React.Component {
         this.popupIndex = d.index;
         this.center = [d.x, d.y];
         this.updateGraph(this.props, true, false);
-      });
+      })
+      .style('cursor', 'pointer');
 
     this.dots
       .append('rect')
       .attr('class', 'time-rect')
-      .attr('fill', 'white');
+      .attr('fill', 'white')
+      .style('pointer-events', 'none');
 
     this.dots
       .append('text')
@@ -345,7 +347,8 @@ class Map extends React.Component {
       .attr('font-family', SANS_SERIF_FONT)
       .attr('font-weight', 'bold')
       .attr('fill', 'black')
-      .attr('text-anchor', 'middle');
+      .attr('text-anchor', 'middle')
+      .style('pointer-events', 'none');
     this.dots
       .append('circle')
       .attr('r', 12)
@@ -382,8 +385,11 @@ class Map extends React.Component {
       .enter()
       .append('g')
       .attr('class', 'popup')
-      .attr('fill', 'white');
-    // .attr('transform', d => `translate(${d.x - 100}, ${d.y - BALLOON_HEIGHT + 20})`);
+      .attr('fill', 'white')
+      .on('click', d => {
+        this.popupIndex = null;
+        this.updateGraph(this.props, true, false);
+      });
     this.balloons
       .append('polygon')
       .attr('points', '0,0 10,20, 20,0')
@@ -448,6 +454,16 @@ class Map extends React.Component {
           }
         }
       });
+    this.balloons
+      .append('text')
+      .attr('font-size', 14)
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('fill', '#999')
+      .attr('text-anchor', 'end')
+      .attr('x', 190)
+      .attr('y', 20)
+      .text('x')
+      .style('cursor', 'pointer');
 
     this.width = props.width || window.innerWidth;
     this.height = props.height || window.innerHeight;
@@ -671,13 +687,15 @@ class Map extends React.Component {
       .style('pointer-events', 'none');
 
     this.balloons
-      // .transition()
-      // .duration(willTransition ? TRANSITION_DURATION : 0)
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('transform', d => {
-        const scale = this.popupIndex === d.index ? 1 / this.zoom : 0.01;
-        return `translate(${d.x - 100 * factor}, ${d.y - (BALLOON_HEIGHT + 17) * factor}) scale(${scale})`;
+        return `translate(${d.x - 100 * factor}, ${d.y - (BALLOON_HEIGHT + 17) * factor}) scale(${1 / this.zoom})`;
       })
-      .style('opacity', d => (this.popupIndex === d.index ? 1 : 0));
+      .style('opacity', d => (this.popupIndex === d.index ? 1 : 0))
+      .style('pointer-events', d => {
+        return this.popupIndex === d.index ? 'auto' : 'none';
+      });
   }
 
   render() {
