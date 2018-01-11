@@ -281,17 +281,6 @@ class Map extends React.Component {
       .attr('d', this.path)
       .style('fill', fill);
 
-    // Give the current cyclone a swirling wind
-    this.images = this.everything.append('g');
-    this.images
-      .selectAll('image')
-      .data(cycloneData)
-      .enter()
-      .append('image')
-      .lower()
-      .attr('class', styles.cycloneImage)
-      .attr('href', d => cycloneImages[d.properties.category]);
-
     // Render the weather stuff
     this.features = this.everything.append('g');
     this.features
@@ -318,6 +307,17 @@ class Map extends React.Component {
         }
         return 1;
       });
+
+    // Give the current cyclone a swirling wind
+    this.images = this.everything.append('g');
+    this.images
+      .selectAll('image')
+      .data(cycloneData)
+      .enter()
+      .append('image')
+      .lower()
+      .attr('class', styles.cycloneImage)
+      .attr('href', d => cycloneImages[d.properties.category]);
 
     this.places = this.everything.append('g');
 
@@ -605,7 +605,7 @@ class Map extends React.Component {
       .data(cycloneData)
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .style('opacity', 0.5)
+      .style('opacity', 0.8)
       .attr('href', d => cycloneImages[d.properties.category])
       .attr('x', d => d.x - cycloneSize / 2)
       .attr('y', d => d.y - cycloneSize / 2)
