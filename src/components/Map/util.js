@@ -17,6 +17,8 @@ const colourConfig = {
     fix: '#fff'
   },
   fill: {
+    Damaging: 'rgba(182, 7, 7, 0.2)',
+    Destructive: 'rgba(96, 0, 0, 0.2)',
     'Likely Tracks Area': d => `url(#uncertainty${d.uncertaintyKey})`,
     'Watch Area': '#ffbd55',
     'Warning Area': '#ff9255',
@@ -62,6 +64,8 @@ function fill(d) {
         .toString();
     }
     c = colour;
+  } else if (d.properties.fixtype === 'Current' && d.properties.windtype) {
+    c = colourConfig.fill[d.properties.windtype];
   } else {
     return 'transparent';
   }
