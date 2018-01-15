@@ -244,7 +244,7 @@ class Map extends React.Component {
     });
 
     const factor = 1 / this.zoom;
-    balloon.attr('transform', `translate(${x - width / 2 * factor}, ${y - height * factor - 5}) scale(${factor})`);
+    balloon.attr('transform', `translate(${x - width / 2 * factor}, ${y - height * factor - 2}) scale(${factor})`);
     balloon.props = { x, y, width, height };
 
     this.hintBalloon = balloon;
@@ -821,7 +821,7 @@ class Map extends React.Component {
       this.hintBalloon
         .transition()
         .duration(willTransition ? TRANSITION_DURATION : 0)
-        .attr('transform', `translate(${p.x - p.width / 2 * factor}, ${p.y - p.height * factor - 5}) scale(${factor})`);
+        .attr('transform', `translate(${p.x - p.width / 2 * factor}, ${p.y - p.height * factor - 2}) scale(${factor})`);
     }
   }
 
