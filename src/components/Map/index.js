@@ -498,7 +498,9 @@ class Map extends React.Component {
       .attr('font-family', SANS_SERIF_FONT)
       .attr('font-weight', 'bold')
       .attr('font-size', 14)
-      .attr('fill', 'white')
+      .attr('fill', d => {
+        return tinycolor(fill(d)).getBrightness() > 128 ? 'black' : 'white';
+      })
       .attr('text-anchor', 'middle')
       .attr('dy', 4)
       .attr('x', d => d.x)
