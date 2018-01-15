@@ -26,7 +26,13 @@ class App extends React.Component {
 
     return (
       <div className={styles.base}>
-        <Map data={this.props.data} zoom={this.state.zoom} index={this.props.index} center={this.state.center} />
+        <Map
+          data={this.props.data}
+          zoom={this.state.zoom}
+          onAutoZoom={zoom => this.setState(state => ({ zoom }))}
+          index={this.props.index}
+          center={this.state.center}
+        />
 
         <div className={styles.toolbar}>
           <button

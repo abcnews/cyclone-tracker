@@ -21,6 +21,9 @@ class Map extends React.Component {
   constructor(props) {
     super(props);
 
+    this.getWrappedText = this.getWrappedText.bind(this);
+    this.createBalloon = this.createBalloon.bind(this);
+
     this.key = props.index || Math.floor(Math.random() * 100000).toString();
     this.processData = this.processData.bind(this);
 
@@ -137,7 +140,114 @@ class Map extends React.Component {
       centerArea = fallbackCenterArea;
     }
 
+    weatherData = weatherData.sort((a, b) => {
+      if (a.properties.extent && a.properties.extent.indexOf('120')) return 1;
+      return -1;
+    });
+
     return { data, areaData, cycloneData, weatherData, fixData, area, centerArea };
+  }
+
+  getWrappedText(text, maxWidth) {
+    maxWidth = maxWidth || 150;
+
+    const svg = this.svg;
+    const words = text.split(' ');
+    let lines = [''];
+    let lineIndex = 0;
+    let currentLineLength = 0;
+
+    words.forEach(word => {
+      // work out its bounding box
+      const textElement = svg
+        .append('text')
+        .attr('font-size', 14)
+        .attr('font-family', SANS_SERIF_FONT)
+        .text(word + ' ');
+      const box = textElement.node().getBBox();
+      textElement.remove();
+
+      if (currentLineLength + box.width > maxWidth) {
+        lines.push('');
+        lineIndex++;
+        currentLineLength = 0;
+      }
+
+      lines[lineIndex] += word + ' ';
+      currentLineLength += box.width;
+    });
+
+    return lines;
+  }
+
+  createBalloon(text, x, y, parentGroup) {
+    if (this.hintBalloon) this.hintBalloon.remove();
+
+    this.popupIndex = null;
+    this.center = [x, y];
+    this.updateGraph(this.props, true, false);
+
+    if (!parentGroup) parentGroup = this.fixes;
+
+    // create a new group on the given group
+    const balloon = parentGroup
+      .append('g')
+      .attr('class', 'popup')
+      .attr('fill', 'white');
+
+    const lines = this.getWrappedText(text, 150);
+    const width = 190;
+    const height = 25 + lines.length * 18;
+
+    balloon
+      .append('polygon')
+      .attr('points', '0,0 10,20, 20,0')
+      .attr('transform', `translate(90, ${height - 11})`);
+    balloon
+      .append('rect')
+      .attr('fill', 'white')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('rx', 3)
+      .attr('ry', 3)
+      .attr('width', width)
+      .attr('height', height - 5);
+
+    lines.forEach((line, index) => {
+      balloon
+        .append('text')
+        .attr('font-size', 14)
+        .attr('font-family', SANS_SERIF_FONT)
+        .attr('fill', '#222')
+        .attr('text-anchor', 'start')
+        .attr('x', 10)
+        .attr('y', 20 + index * 20)
+        .text(line);
+    });
+
+    balloon
+      .append('text')
+      .attr('font-size', 14)
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-weight', 'bold')
+      .attr('fill', '#999')
+      .attr('text-anchor', 'end')
+      .attr('x', width - 7)
+      .attr('dy', 7)
+      .attr('y', 7)
+      .text('x')
+      .style('cursor', 'pointer');
+
+    balloon.on('click', d => {
+      this.hintBalloon.remove();
+      this.hintBalloon = null;
+    });
+
+    const factor = 1 / this.zoom;
+    balloon.attr('transform', `translate(${x - width / 2 * factor}, ${y - height * factor - 5}) scale(${factor})`);
+    balloon.props = { x, y, width, height };
+
+    this.hintBalloon = balloon;
   }
 
   onResize() {
@@ -281,7 +391,11 @@ class Map extends React.Component {
       .enter()
       .append('path')
       .attr('d', this.path)
-      .style('fill', fill);
+      .style('fill', fill)
+      .on('click', d => {
+        const [x, y] = d3.mouse(select.event.target);
+        this.createBalloon(d.properties.areatype + ': ' + d.properties.extent, x, y);
+      });
 
     // Render the weather stuff
     this.features = this.everything.append('g');
@@ -296,6 +410,8 @@ class Map extends React.Component {
           return styles.track;
         } else if (d.properties.tracktype === 'Observed') {
           return styles.track;
+        } else if (d.properties.areatype) {
+          return 'areatype';
         }
         return '';
       })
@@ -309,6 +425,11 @@ class Map extends React.Component {
         }
         return 1;
       });
+
+    this.features.selectAll('path.areatype').on('click', d => {
+      const [x, y] = d3.mouse(select.event.target);
+      this.createBalloon(d.properties.areatype + ': ' + d.properties.extent, x, y);
+    });
 
     // Give the current cyclone a swirling wind
     this.images = this.everything.append('g');
@@ -331,6 +452,11 @@ class Map extends React.Component {
       .append('g')
       .attr('class', 'dot')
       .on('click', d => {
+        if (this.hintBalloon) {
+          this.hintBalloon.remove();
+          this.hintBalloon = null;
+        }
+
         this.popupIndex = d.index;
         this.center = [d.x, d.y];
         this.updateGraph(this.props, true, false);
@@ -489,6 +615,7 @@ class Map extends React.Component {
     if (!zoom && area) {
       var b = this.path.bounds(area);
       zoom = 0.8 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
+      this.props.onAutoZoom(zoom);
     }
     this.zoom = zoom;
 
@@ -688,6 +815,14 @@ class Map extends React.Component {
       .style('pointer-events', d => {
         return this.popupIndex === d.index ? 'auto' : 'none';
       });
+
+    if (this.hintBalloon) {
+      const p = this.hintBalloon.props;
+      this.hintBalloon
+        .transition()
+        .duration(willTransition ? TRANSITION_DURATION : 0)
+        .attr('transform', `translate(${p.x - p.width / 2 * factor}, ${p.y - p.height * factor - 5}) scale(${factor})`);
+    }
   }
 
   render() {
