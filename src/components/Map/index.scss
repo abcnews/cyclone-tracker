@@ -3,6 +3,10 @@
   overflow: hidden;
   max-height: 100vh;
   cursor: move;
+
+  *::selection {
+    background: transparent;
+  }
 }
 
 .track {

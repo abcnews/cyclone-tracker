@@ -33,6 +33,8 @@ class Map extends React.Component {
     this.updateGraph = this.updateGraph.bind(this);
 
     this.onResize = this.onResize.bind(this);
+
+    this.canCreateBalloon = true;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -181,6 +183,8 @@ class Map extends React.Component {
   }
 
   createBalloon(text, x, y, parentGroup) {
+    if (this.canCreateBalloon !== true) return;
+
     if (this.hintBalloon) this.hintBalloon.remove();
 
     this.popupIndex = null;
@@ -363,10 +367,14 @@ class Map extends React.Component {
             .center[1]})`
         );
       })
-      .on('mouseup touchend', () => {
-        dragStart = null;
-      })
-      .on('mouseleave', () => {
+      .on('mouseup touchend mouseleave', () => {
+        // Don't recenter the map if we are just clicking for a balloon
+        if (centerDragStart && Math.abs(centerDragStart.x - this.center[0]) > 5) {
+          this.canCreateBalloon = setTimeout(() => {
+            this.canCreateBalloon = true;
+          }, 100);
+        }
+
         dragStart = null;
       });
 
