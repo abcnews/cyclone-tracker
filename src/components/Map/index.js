@@ -13,9 +13,9 @@ const SERIF_FONT = 'ABCSerif,Book Antiqua,Palatino Linotype,Palatino,serif';
 const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
 const TRANSITION_DURATION = 400;
 
-const BALLOON_HEIGHT = 115;
+const BALLOON_HEIGHT = 95;
 
-const { cycloneImages, stroke, fill } = require('./util');
+const { cycloneImages, stroke, fill, labels } = require('./util');
 
 class Map extends React.Component {
   constructor(props) {
@@ -199,14 +199,10 @@ class Map extends React.Component {
       .attr('class', 'popup')
       .attr('fill', 'white');
 
-    const lines = this.getWrappedText(text, 150);
+    const lines = this.getWrappedText(text, 145);
     const width = 190;
-    const height = 25 + lines.length * 18;
+    const height = 30 + lines.length * 18;
 
-    balloon
-      .append('polygon')
-      .attr('points', '0,0 10,20, 20,0')
-      .attr('transform', `translate(90, ${height - 11})`);
     balloon
       .append('rect')
       .attr('fill', 'white')
@@ -215,7 +211,22 @@ class Map extends React.Component {
       .attr('rx', 3)
       .attr('ry', 3)
       .attr('width', width)
-      .attr('height', height - 5);
+      .attr('height', height - 5)
+      .attr('stroke', 'rgba(0,0,0,0.3)')
+      .style('strock-width', 1);
+
+    balloon
+      .append('polygon')
+      .attr('points', '0,0 8,10, 16,0')
+      .attr('transform', `translate(90, ${height - 5})`)
+      .attr('stroke', 'rgba(0,0,0,0.3)')
+      .style('strock-width', 1);
+    balloon
+      .append('polygon')
+      .attr('points', '0,0 8,10, 16,0')
+      .attr('transform', `translate(90, ${height - 6})`)
+      .attr('stroke', 'white')
+      .style('strock-width', 1);
 
     lines.forEach((line, index) => {
       balloon
@@ -224,8 +235,8 @@ class Map extends React.Component {
         .attr('font-family', SANS_SERIF_FONT)
         .attr('fill', '#222')
         .attr('text-anchor', 'start')
-        .attr('x', 10)
-        .attr('y', 20 + index * 20)
+        .attr('x', 15)
+        .attr('y', 25 + index * 20)
         .text(line);
     });
 
@@ -474,7 +485,8 @@ class Map extends React.Component {
     this.dots
       .append('rect')
       .attr('class', 'time-rect')
-      .attr('fill', 'white')
+      .attr('fill', 'rgba(255,255,255,0.9)')
+      .attr('stroke', '#999')
       .style('pointer-events', 'none');
 
     this.dots
@@ -485,8 +497,19 @@ class Map extends React.Component {
       .attr('fill', 'black')
       .attr('text-anchor', 'middle')
       .style('pointer-events', 'none');
+
     this.dots
       .append('circle')
+      .attr('class', 'stroke')
+      .attr('r', 12)
+      .attr('fill', fill)
+      .attr('stroke', '#111')
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y);
+
+    this.dots
+      .append('circle')
+      .attr('class', 'fill')
       .attr('r', 12)
       .attr('fill', fill)
       .attr('stroke', stroke)
@@ -528,19 +551,29 @@ class Map extends React.Component {
         this.popupIndex = null;
         this.updateGraph(this.props, true, false);
       });
-    this.balloons
-      .append('polygon')
-      .attr('points', '0,0 10,20, 20,0')
-      .attr('transform', `translate(90, ${BALLOON_HEIGHT - 11})`);
+
     this.balloons
       .append('rect')
       .attr('fill', 'white')
       .attr('x', 0)
       .attr('y', 0)
-      .attr('rx', 5)
-      .attr('ry', 5)
+      .attr('rx', 3)
+      .attr('ry', 3)
       .attr('width', 200)
-      .attr('height', BALLOON_HEIGHT - 10);
+      .attr('height', BALLOON_HEIGHT - 5)
+      .attr('stroke', 'rgba(0,0,0,0.3)')
+      .style('strock-width', 1);
+    this.balloons
+      .append('polygon')
+      .attr('points', '0,0 10,10, 20,0')
+      .attr('transform', `translate(90, ${BALLOON_HEIGHT - 5})`)
+      .attr('stroke', 'rgba(0,0,0,0.3)')
+      .style('strock-width', 1);
+    this.balloons
+      .append('polygon')
+      .attr('points', '0,0 10,10, 20,0')
+      .attr('transform', `translate(90, ${BALLOON_HEIGHT - 7})`)
+      .attr('stroke', 'white');
     this.balloons
       .append('text')
       .attr('font-size', 14)
@@ -549,7 +582,7 @@ class Map extends React.Component {
       .attr('font-weight', 'bold')
       .attr('text-anchor', 'middle')
       .attr('x', 100)
-      .attr('y', 20)
+      .attr('y', 25)
       .text(d => d.properties.fixtype.toUpperCase());
     this.balloons
       .append('text')
@@ -558,30 +591,17 @@ class Map extends React.Component {
       .attr('fill', '#222')
       .attr('text-anchor', 'middle')
       .attr('x', 100)
-      .attr('y', 40)
-      .text(d => format(d.properties.fixtime, 'ddd D MMM'));
-    this.balloons
-      .append('text')
-      .attr('font-size', 14)
-      .attr('font-family', SANS_SERIF_FONT)
-      .attr('fill', '#222')
-      .attr('text-anchor', 'middle')
-      .attr('x', 100)
-      .attr('y', 60)
-      .text(d => format(d.properties.fixtime, 'h:mmA'));
+      .attr('y', 45)
+      .text(d => format(d.properties.fixtime, 'ddd D MMM, h:mmA').toUpperCase());
     this.balloons
       .append('text')
       .attr('font-size', 16)
       .attr('font-family', SANS_SERIF_FONT)
       .attr('font-weight', 'bold')
-      .attr('fill', d => {
-        return tinycolor(fill(d))
-          .darken(50)
-          .toString();
-      })
+      .attr('fill', d => labels(d))
       .attr('text-anchor', 'middle')
       .attr('x', 100)
-      .attr('y', 90)
+      .attr('y', 70)
       .text(d => {
         if (d.properties.symbol) {
           switch (d.properties.symbol) {
@@ -762,7 +782,7 @@ class Map extends React.Component {
       .style('stroke-width', 2 * factor)
       .style('stroke-dasharray', d => {
         if (d.properties.tracktype === 'Forecast') {
-          return `${10 * factor} ${4 * factor}`;
+          return `${9 * factor} ${5 * factor}`;
         } else if (d.properties.tracktype) {
           return `${13 * factor} ${1 * factor}`;
         }
@@ -781,7 +801,8 @@ class Map extends React.Component {
       .attr('ry', 5 * factor)
       .attr('width', 100 * factor)
       .attr('height', 20 * factor)
-      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
+      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0))
+      .style('stroke-width', 1 * factor);
     this.dots
       .selectAll('text.time-text')
       .transition()
@@ -794,7 +815,7 @@ class Map extends React.Component {
       .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
 
     this.dots
-      .selectAll('circle')
+      .selectAll('circle.stroke')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('r', d => {
@@ -805,14 +826,28 @@ class Map extends React.Component {
       })
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
-      .attr('stroke-width', 2 * factor);
+      .attr('stroke-width', d => (d.properties.fixtype === 'Observed' ? 2 : 4) * factor);
+
+    this.dots
+      .selectAll('circle.fill')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('r', d => {
+        if (d.properties.fixtype === 'Observed') {
+          return 10 * factor;
+        }
+        return 12 * factor;
+      })
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('stroke-width', d => (d.properties.fixtype === 'Observed' ? 0 : 2) * factor);
 
     this.dots
       .selectAll('text.letter')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('font-size', d => (d.properties.fixtype === 'Observed' ? 10 : 14) * factor)
-      .attr('dy', d => (d.properties.fixtype === 'Observed' ? 3 : 4) * factor)
+      .attr('dy', d => (d.properties.fixtype === 'Observed' ? 3 : 5) * factor)
       .style('pointer-events', 'none');
 
     this.balloons

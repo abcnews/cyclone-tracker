@@ -28,6 +28,14 @@ const colourConfig = {
     '3': '#FF5D48',
     '4': '#D60D4C',
     '5': '#760040'
+  },
+  labels: {
+    Low: '#2A8189',
+    '1': '#AD6200',
+    '2': '#DB3A00',
+    '3': '#E81B00',
+    '4': '#D60D4C',
+    '5': '#760040'
   }
 };
 
@@ -77,4 +85,14 @@ function fill(d) {
   return c;
 }
 
-module.exports = { cycloneImages, fill, stroke };
+function labels(d) {
+  let c;
+
+  if (d.properties.symbol) {
+    c = d.properties.symbol === 'Low' ? colourConfig.labels['Low'] : colourConfig.labels[d.properties.category];
+  }
+
+  return c;
+}
+
+module.exports = { cycloneImages, fill, stroke, labels };
