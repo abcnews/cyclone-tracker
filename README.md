@@ -12,4 +12,4 @@ Render BOM Cyclone GML files on a map.
 
 ## Authors
 
-* Nathan Hoad ([nathan@nathanhoad.net](mailto:nathan@nathanhoad.net))
+- Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))

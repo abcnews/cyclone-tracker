@@ -71,18 +71,25 @@ class Map extends React.Component {
       return { data: [], areaData, cycloneData, weatherData, fixData, area, centerArea };
 
     let likelyTracksCount = 1;
-    const data = props.data.features.map((f, index) => {
-      f.index = index;
-      f.uncertaintyKey = this.key;
-      f.x = this.path.centroid(f)[0];
-      f.y = this.path.centroid(f)[1];
+    let likelyTracks = [];
 
-      if (f.properties.areatype === 'Likely Tracks Area') {
-        f.likelyTracksIndex = likelyTracksCount++;
-      }
+    const data = props.data.features
+      .map((f, index) => {
+        f.index = index;
+        f.uncertaintyKey = this.key;
+        f.x = this.path.centroid(f)[0];
+        f.y = this.path.centroid(f)[1];
 
-      return f;
-    });
+        if (f.properties.areatype === 'Likely Tracks Area') {
+          f.likelyTracksIndex = likelyTracksCount++;
+          likelyTracks.push(f);
+          return null;
+        }
+
+        return f;
+      })
+      .filter(d => d)
+      .concat(likelyTracks.reverse());
 
     let fallbackCenterArea;
     let forecastLine;
@@ -119,23 +126,25 @@ class Map extends React.Component {
     });
 
     // TODO: change this to focus on the forecast area
-    area = [fallbackCenterArea, forecastLine, centerArea].filter(a => a).reduce(
-      (line, current) => {
-        const coordinates =
-          current.geometry.coordinates[0][0] instanceof Array
-            ? current.geometry.coordinates[0]
-            : current.geometry.coordinates;
-        line.geometry.coordinates = line.geometry.coordinates.concat(coordinates);
-        return line;
-      },
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'LineString',
-          coordinates: []
+    area = [fallbackCenterArea, forecastLine, centerArea]
+      .filter(a => a)
+      .reduce(
+        (line, current) => {
+          const coordinates =
+            current.geometry.coordinates[0][0] instanceof Array
+              ? current.geometry.coordinates[0]
+              : current.geometry.coordinates;
+          line.geometry.coordinates = line.geometry.coordinates.concat(coordinates);
+          return line;
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: []
+          }
         }
-      }
-    );
+      );
 
     // If there are no likely tracks, just use the observed area
     if (!centerArea) {
@@ -201,7 +210,7 @@ class Map extends React.Component {
 
     const lines = this.getWrappedText(text, 145);
     const width = 190;
-    const height = 30 + lines.length * 18;
+    const height = 30 + lines.length * 20;
 
     balloon
       .append('rect')
@@ -259,7 +268,7 @@ class Map extends React.Component {
     });
 
     const factor = 1 / this.zoom;
-    balloon.attr('transform', `translate(${x - width / 2 * factor}, ${y - height * factor - 2}) scale(${factor})`);
+    balloon.attr('transform', `translate(${x - (width / 2) * factor}, ${y - height * factor - 2}) scale(${factor})`);
     balloon.props = { x, y, width, height };
 
     this.hintBalloon = balloon;
@@ -392,6 +401,7 @@ class Map extends React.Component {
     this.everything = this.svg.append('g');
 
     this.mapFeatures = this.everything.append('g');
+    this.mapFeatures.attr('name', 'map-features');
     this.mapFeatures
       .selectAll('path')
       .data(mapData)
@@ -404,6 +414,7 @@ class Map extends React.Component {
     const { areaData, cycloneData, weatherData, fixData, centerArea } = this.processData(props);
 
     this.areaFeatures = this.everything.append('g');
+    this.areaFeatures.attr('name', 'area-features');
     this.areaFeatures
       .selectAll('path')
       .data(areaData)
@@ -418,6 +429,7 @@ class Map extends React.Component {
 
     // Render the weather stuff
     this.features = this.everything.append('g');
+    this.features.attr('name', 'features');
     this.features
       .selectAll('path')
       .data(weatherData)
@@ -452,6 +464,7 @@ class Map extends React.Component {
 
     // Give the current cyclone a swirling wind
     this.images = this.everything.append('g');
+    this.images.attr('name', 'images');
     this.images
       .selectAll('image')
       .data(cycloneData)
@@ -462,11 +475,13 @@ class Map extends React.Component {
       .attr('href', d => cycloneImages[d.properties.category]);
 
     this.places = this.everything.append('g');
+    this.places.attr('name', 'places');
 
     this.fixes = this.everything.append('g');
+    this.fixes.attr('name', 'fixes');
     this.dots = this.fixes
       .selectAll('g.dot')
-      .data(fixData)
+      .data(fixData.filter(d => d.properties.fixtype !== 'Current'))
       .enter()
       .append('g')
       .attr('class', 'dot')
@@ -481,22 +496,6 @@ class Map extends React.Component {
         this.updateGraph(this.props, true, false);
       })
       .style('cursor', 'pointer');
-
-    this.dots
-      .append('rect')
-      .attr('class', 'time-rect')
-      .attr('fill', 'rgba(255,255,255,0.9)')
-      .attr('stroke', '#999')
-      .style('pointer-events', 'none');
-
-    this.dots
-      .append('text')
-      .attr('class', 'time-text')
-      .attr('font-family', SANS_SERIF_FONT)
-      .attr('font-weight', 'bold')
-      .attr('fill', 'black')
-      .attr('text-anchor', 'middle')
-      .style('pointer-events', 'none');
 
     this.dots
       .append('circle')
@@ -516,6 +515,81 @@ class Map extends React.Component {
       .attr('cx', d => d.x)
       .attr('cy', d => d.y);
     this.dots
+      .append('text')
+      .attr('class', 'letter')
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-weight', 'bold')
+      .attr('font-size', 14)
+      .attr('fill', d => {
+        return tinycolor(fill(d)).getBrightness() > 128 ? 'black' : 'white';
+      })
+      .attr('text-anchor', 'middle')
+      .attr('dy', 4)
+      .attr('x', d => d.x)
+      .attr('y', d => d.y)
+      .text(d => {
+        if (d.properties.symbol) {
+          switch (d.properties.symbol) {
+            case 'Low':
+              return 'L';
+            case 'Cyclone':
+              return d.properties.category;
+          }
+        }
+      });
+
+    this.current = this.fixes
+      .selectAll('g.currentDot')
+      .data(fixData.filter(d => d.properties.fixtype === 'Current'))
+      .enter()
+      .append('g')
+      .attr('class', 'dot')
+      .on('click', d => {
+        if (this.hintBalloon) {
+          this.hintBalloon.remove();
+          this.hintBalloon = null;
+        }
+
+        this.popupIndex = d.index;
+        this.center = [d.x, d.y];
+        this.updateGraph(this.props, true, false);
+      })
+      .style('cursor', 'pointer');
+
+    this.current
+      .append('rect')
+      .attr('class', 'time-rect')
+      .attr('fill', 'rgba(255,255,255,0.9)')
+      .attr('stroke', '#999')
+      .style('pointer-events', 'none');
+
+    this.current
+      .append('text')
+      .attr('class', 'time-text')
+      .attr('font-family', SANS_SERIF_FONT)
+      .attr('font-weight', 'bold')
+      .attr('fill', 'black')
+      .attr('text-anchor', 'middle')
+      .style('pointer-events', 'none');
+
+    this.current
+      .append('circle')
+      .attr('class', 'stroke')
+      .attr('r', 12)
+      .attr('fill', fill)
+      .attr('stroke', '#111')
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y);
+
+    this.current
+      .append('circle')
+      .attr('class', 'fill')
+      .attr('r', 12)
+      .attr('fill', fill)
+      .attr('stroke', stroke)
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y);
+    this.current
       .append('text')
       .attr('class', 'letter')
       .attr('font-family', SANS_SERIF_FONT)
@@ -790,29 +864,41 @@ class Map extends React.Component {
       .style('animation', 'marching 1.8s linear infinite');
 
     this.dots.data(fixData);
+    this.dots
+      .selectAll('circle.stroke')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('r', d => {
+        if (d.properties.fixtype === 'Observed') {
+          return 10 * factor;
+        }
+        return 12 * factor;
+      })
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('stroke-width', d => (d.properties.fixtype === 'Observed' ? 2 : 4) * factor);
 
     this.dots
-      .selectAll('rect.time-rect')
+      .selectAll('circle.fill')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('x', d => d.x)
-      .attr('y', d => d.y - 10 * factor)
-      .attr('rx', 5 * factor)
-      .attr('ry', 5 * factor)
-      .attr('width', 100 * factor)
-      .attr('height', 20 * factor)
-      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0))
-      .style('stroke-width', 1 * factor);
+      .attr('r', d => {
+        if (d.properties.fixtype === 'Observed') {
+          return 10 * factor;
+        }
+        return 12 * factor;
+      })
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('stroke-width', d => (d.properties.fixtype === 'Observed' ? 0 : 2) * factor);
+
     this.dots
-      .selectAll('text.time-text')
+      .selectAll('text.letter')
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
-      .attr('font-size', 10 * factor)
-      .attr('dy', 4 * factor)
-      .attr('x', d => d.x + 55 * factor)
-      .attr('y', d => d.y)
-      .text(d => format(d.properties.fixtime, 'ddd D/M hA').toUpperCase())
-      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
+      .attr('font-size', d => (d.properties.fixtype === 'Observed' ? 10 : 14) * factor)
+      .attr('dy', d => (d.properties.fixtype === 'Observed' ? 3 : 5) * factor)
+      .style('pointer-events', 'none');
 
     this.dots
       .selectAll('circle.stroke')
@@ -850,6 +936,65 @@ class Map extends React.Component {
       .attr('dy', d => (d.properties.fixtype === 'Observed' ? 3 : 5) * factor)
       .style('pointer-events', 'none');
 
+    this.current
+      .selectAll('circle.stroke')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('r', d => {
+        if (d.properties.fixtype === 'Observed') {
+          return 10 * factor;
+        }
+        return 12 * factor;
+      })
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('stroke-width', d => (d.properties.fixtype === 'Observed' ? 2 : 4) * factor);
+
+    this.current
+      .selectAll('circle.fill')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('r', d => {
+        if (d.properties.fixtype === 'Observed') {
+          return 10 * factor;
+        }
+        return 12 * factor;
+      })
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('stroke-width', d => (d.properties.fixtype === 'Observed' ? 0 : 2) * factor);
+
+    this.current
+      .selectAll('text.letter')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('font-size', d => (d.properties.fixtype === 'Observed' ? 10 : 14) * factor)
+      .attr('dy', d => (d.properties.fixtype === 'Observed' ? 3 : 5) * factor)
+      .style('pointer-events', 'none');
+
+    this.current
+      .selectAll('rect.time-rect')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('x', d => d.x)
+      .attr('y', d => d.y - 10 * factor)
+      .attr('rx', 5 * factor)
+      .attr('ry', 5 * factor)
+      .attr('width', 100 * factor)
+      .attr('height', 20 * factor)
+      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0))
+      .style('stroke-width', 1 * factor);
+    this.current
+      .selectAll('text.time-text')
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('font-size', 10 * factor)
+      .attr('dy', 4 * factor)
+      .attr('x', d => d.x + 55 * factor)
+      .attr('y', d => d.y)
+      .text(d => format(d.properties.fixtime, 'ddd D/M hA').toUpperCase())
+      .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
+
     this.balloons
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
@@ -866,7 +1011,10 @@ class Map extends React.Component {
       this.hintBalloon
         .transition()
         .duration(willTransition ? TRANSITION_DURATION : 0)
-        .attr('transform', `translate(${p.x - p.width / 2 * factor}, ${p.y - p.height * factor - 2}) scale(${factor})`);
+        .attr(
+          'transform',
+          `translate(${p.x - (p.width / 2) * factor}, ${p.y - p.height * factor - 2}) scale(${factor})`
+        );
     }
   }
 

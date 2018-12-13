@@ -14,6 +14,8 @@ function init() {
     if (root.getAttribute('data-url').indexOf('.json') > -1) {
       // Find the latest cyclone (if there is one)
       d3.json(root.getAttribute('data-url'), (err, json) => {
+        if (err) console.log(err);
+
         // Get the path where the json file was loaded to see where the GML files are
         const baseURL = root
           .getAttribute('data-url')
@@ -25,6 +27,10 @@ function init() {
         if (json.cyclones.length > 0) {
           d3.xml(baseURL + '/' + json.cyclones[0].path, (err, xml) => {
             const data = GML.parse(xml);
+
+            window._data = data;
+            console.log('DATA', data);
+
             render(<App data={data} index={index} />, root);
           });
         } else {
