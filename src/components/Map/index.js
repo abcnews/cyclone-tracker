@@ -863,7 +863,7 @@ class Map extends React.Component {
       })
       .style('animation', 'marching 1.8s linear infinite');
 
-    this.dots.data(fixData);
+    this.dots.data(fixData.filter(d => d.properties.fixtype !== 'Current'));
     this.dots
       .selectAll('circle.stroke')
       .transition()

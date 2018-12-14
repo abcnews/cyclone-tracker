@@ -27,10 +27,6 @@ function init() {
         if (json.cyclones.length > 0) {
           d3.xml(baseURL + '/' + json.cyclones[0].path, (err, xml) => {
             const data = GML.parse(xml);
-
-            window._data = data;
-            console.log('DATA', data);
-
             render(<App data={data} index={index} />, root);
           });
         } else {
