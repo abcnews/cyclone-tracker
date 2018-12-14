@@ -11,33 +11,28 @@ function init() {
   const App = require('./components/App');
 
   [].slice.call(document.querySelectorAll(`[data-${PROJECT_NAME}-root]`)).forEach((root, index) => {
-    if (root.getAttribute('data-url').indexOf('.json') > -1) {
-      // Find the latest cyclone (if there is one)
-      d3.json(root.getAttribute('data-url'), (err, json) => {
-        if (err) console.log(err);
-
-        // Get the path where the json file was loaded to see where the GML files are
-        const baseURL = root
-          .getAttribute('data-url')
-          .split('/')
-          .slice(0, -1)
-          .join('/');
-
-        // TODO: load more than 1 cyclone if possible
-        if (json.cyclones.length > 0) {
-          d3.xml(baseURL + '/' + json.cyclones[0].path, (err, xml) => {
-            const data = GML.parse(xml);
-            render(<App data={data} index={index} />, root);
-          });
-        } else {
-          render(<App index={index} />, root);
+    if (document.location.search && document.location.search.indexOf('cyclone') > -1) {
+      // Load the cylone from the query param
+      d3.xml(
+        `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${document.location.search.replace('?cyclone=', '')}`,
+        (err, xml) => {
+          const data = GML.parse(xml);
+          render(<App data={data} index={index} />, root);
         }
-      });
-    } else {
-      // Load in the specific cyclone
+      );
+    } else if (root.getAttribute('data-url')) {
+      // Load in a specific hard-coded cyclone
       d3.xml(root.getAttribute('data-url'), (err, xml) => {
         const data = GML.parse(xml);
         render(<App data={data} index={index} />, root);
+      });
+    } else {
+      // Load from the data url
+      const baseUrl = '//www.abc.net.au/dat/news/bom-cyclone-data/';
+      d3.json(baseUrl + '/cyclones.json', (err, json) => {
+        // Show the actual list of cyclones
+        const List = require('./components/List');
+        render(<List baseUrl={baseUrl} data={json} />, root);
       });
     }
   });
