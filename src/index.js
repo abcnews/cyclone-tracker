@@ -6,20 +6,45 @@ const d3 = require('./d3');
 const GML = require('./loader');
 
 const PROJECT_NAME = 'cyclone-tracker';
+const BASE_URL = 'https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.0.0/';
+
+const getDistId = strings => {
+  if (typeof strings === 'string') strings = [strings];
+
+  return strings
+    .map(s => {
+      const matches = s.match(/\?cyclone\=([^\.]+\.gml)/);
+      return matches && matches[1] ? matches[1] : null;
+    })
+    .filter(s => s)[0];
+};
 
 function init() {
   const App = require('./components/App');
 
+  [].slice.call(document.querySelectorAll(`a[href*="/news/specials/cyclones"]`)).forEach(a => {
+    // Create an iframe to house an instance of ourselves in it
+    const iframe = document.createElement('iframe');
+    const distId = getDistId([a.href, document.location.search]);
+    if (distId) {
+      iframe.src = `${BASE_URL}?cyclone=${distId}`;
+    } else {
+      iframe.src = BASE_URL;
+    }
+    iframe.width = a.parentElement.offsetWidth;
+    iframe.height = 500;
+
+    a.parentElement.insertBefore(iframe, a);
+    a.parentElement.removeChild(a);
+  });
+
   [].slice.call(document.querySelectorAll(`[data-${PROJECT_NAME}-root]`)).forEach((root, index) => {
     if (document.location.search && document.location.search.indexOf('cyclone') > -1) {
       // Load the cylone from the query param
-      d3.xml(
-        `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${document.location.search.replace('?cyclone=', '')}`,
-        (err, xml) => {
-          const data = GML.parse(xml);
-          render(<App data={data} index={index} />, root);
-        }
-      );
+      d3.xml(`//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${getDistId(document.location.search)}`, (err, xml) => {
+        const data = GML.parse(xml);
+        render(<App data={data} index={index} />, root);
+      });
     } else if (root.getAttribute('data-url')) {
       // Load in a specific hard-coded cyclone
       d3.xml(root.getAttribute('data-url'), (err, xml) => {

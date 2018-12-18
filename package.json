@@ -1,7 +1,7 @@
 {
   "name": "cyclone-tracker",
-  "version": "1.0.0",
-  "description": "A project generated from aunty's react-app template.",
+  "version": "3.0.0",
+  "description": "Renders a given cyclone on a map of Australia",
   "license": "MIT",
   "private": true,
   "contributors": [
@@ -35,6 +35,7 @@
     "object-assign": "^4.1.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-timestamp": "^4.4.0",
     "tinycolor2": "^1.4.1",
     "topojson": "^3.0.2"
   }

@@ -718,7 +718,7 @@ class Map extends React.Component {
     let zoom = props.zoom;
     if (!zoom && area) {
       var b = this.path.bounds(area);
-      zoom = 0.8 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
+      zoom = 0.7 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
       this.props.onAutoZoom(zoom);
     }
     this.zoom = zoom;
@@ -770,6 +770,7 @@ class Map extends React.Component {
       if (!center) {
         if (area) {
           center = this.path.centroid(area);
+          center[1] += 25;
         } else {
           center = this.path.centroid({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[136, -27]] } });
           zoom = 1;
