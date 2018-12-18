@@ -33,7 +33,7 @@ function init() {
     }
     iframe.width = a.parentElement.offsetWidth;
     iframe.height = 500;
-    iframe.style.setProperty('frameBorder', 0);
+    iframe.setAttribute('frameBorder', 0);
 
     // Find the nearest parent with the extended link embed class
     const replace = a.closest('.view-external-link-embedded') || a;
