@@ -6,7 +6,7 @@ const d3 = require('./d3');
 const GML = require('./loader');
 
 const PROJECT_NAME = 'cyclone-tracker';
-const BASE_URL = `https://${document.location.host}/res/sites/news-projects/cyclone-tracker/3.0.5/`;
+const BASE_URL = `https://${document.location.host}/res/sites/news-projects/cyclone-tracker/3.0.6/`;
 
 const getDistId = strings => {
   if (typeof strings === 'string') strings = [strings];
