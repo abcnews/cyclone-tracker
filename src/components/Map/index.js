@@ -360,7 +360,7 @@ class Map extends React.Component {
     let centerDragStart = null;
     this.svg
       .on('mousedown touchstart', () => {
-        if (window.parent) window.parent.postMessage('lockScroll');
+        if (window.parent) window.parent.postMessage({ lockScroll: true });
 
         const e = select.event.touches ? select.event.touches[0] : select.event;
 
@@ -390,7 +390,7 @@ class Map extends React.Component {
         );
       })
       .on('mouseup touchend mouseleave', () => {
-        if (window.parent) window.parent.postMessage('unlockScroll');
+        if (window.parent) window.parent.postMessage({ lockScroll: false });
 
         // Don't recenter the map if we are just clicking for a balloon
         if (centerDragStart && Math.abs(centerDragStart.x - this.center[0]) > 5) {
