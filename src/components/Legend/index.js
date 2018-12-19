@@ -95,14 +95,14 @@ class Legend extends React.Component {
               <h3>Wind areas</h3>
               {d.has24Hours && (
                 <div>
-                  <div className={styles.area} style={{ background: '#ffbd55' }} />
+                  <div className={styles.area} style={{ background: '#ff9255' }} />
                   24 hours
                 </div>
               )}
 
               {d.has48Hours && (
                 <div>
-                  <div className={styles.area} style={{ background: '#ff9255' }} />
+                  <div className={styles.area} style={{ background: '#ffbd55' }} />
                   48 hours
                 </div>
               )}
