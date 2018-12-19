@@ -722,7 +722,7 @@ class Map extends React.Component {
     let zoom = props.zoom;
     if (!zoom && area) {
       var b = this.path.bounds(area);
-      zoom = 0.7 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
+      zoom = 0.6 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
       this.props.onAutoZoom(zoom);
     }
     this.zoom = zoom;
