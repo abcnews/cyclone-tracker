@@ -6,7 +6,7 @@ const d3 = require('./d3');
 const GML = require('./loader');
 
 const PROJECT_NAME = 'cyclone-tracker';
-const BASE_URL = 'https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.0.3/';
+const BASE_URL = 'https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.0.4/';
 
 const getDistId = strings => {
   if (typeof strings === 'string') strings = [strings];
@@ -39,6 +39,10 @@ function init() {
     const replace = a.closest('.view-external-link-embedded') || a;
     replace.parentElement.insertBefore(iframe, replace);
     replace.parentElement.removeChild(replace);
+
+    window.addEventListener('message', event => {
+      console.log('EVENT', event);
+    });
   });
 
   [].slice.call(document.querySelectorAll(`[data-${PROJECT_NAME}-root]`)).forEach((root, index) => {
