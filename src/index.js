@@ -6,7 +6,7 @@ const d3 = require('./d3');
 const GML = require('./loader');
 
 const PROJECT_NAME = 'cyclone-tracker';
-const BASE_URL = `https://${document.location.host}/res/sites/news-projects/cyclone-tracker/3.0.7/`;
+const BASE_URL = `https://${document.location.host}/res/sites/news-projects/cyclone-tracker/3.0.8/`;
 
 const getDistId = strings => {
   if (typeof strings === 'string') strings = [strings];
@@ -45,8 +45,14 @@ function init() {
       if (typeof event.data.lockScroll !== 'undefined') {
         if (event.data.lockScroll) {
           document.body.style.setProperty('overflow', 'hidden');
+          document.body.style.setProperty('width', '100%');
+          document.body.style.setProperty('height', '100%');
+          document.body.style.setProperty('position', 'fixed');
         } else {
           document.body.style.removeProperty('overflow');
+          document.body.style.removeProperty('width');
+          document.body.style.removeProperty('height');
+          document.body.style.removeProperty('position');
         }
       }
     });
