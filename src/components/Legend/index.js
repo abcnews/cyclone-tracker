@@ -19,6 +19,7 @@ class Legend extends React.Component {
     let hasWind = false;
     let hasDamagingWinds = false;
     let hasDestructiveWinds = false;
+    let hasVeryDestructiveWinds = false;
 
     let hasWindArea = false;
     let has24Hours = false;
@@ -37,6 +38,11 @@ class Legend extends React.Component {
         hasDestructiveWinds = true;
       }
 
+      if (d.properties.windtype === 'Very Destructive') {
+        hasWind = true;
+        hasVeryDestructiveWinds = true;
+      }
+
       if (d.properties.areatype === 'Watch Area') {
         hasWindArea = true;
         has24Hours = true;
@@ -52,7 +58,16 @@ class Legend extends React.Component {
       }
     });
 
-    return { hasWind, hasDamagingWinds, hasDestructiveWinds, hasWindArea, has24Hours, has48Hours, hasLikelyTrack };
+    return {
+      hasWind,
+      hasDamagingWinds,
+      hasDestructiveWinds,
+      hasVeryDestructiveWinds,
+      hasWindArea,
+      has24Hours,
+      has48Hours,
+      hasLikelyTrack
+    };
   }
 
   render() {
@@ -85,6 +100,13 @@ class Legend extends React.Component {
                 <div>
                   <div className={styles.circle} style={{ borderColor: '#600000' }} />
                   Destructive
+                </div>
+              )}
+
+              {d.hasVeryDestructiveWinds && (
+                <div>
+                  <div className={styles.circle} style={{ borderColor: '#000000' }} />
+                  Very Destructive
                 </div>
               )}
             </div>

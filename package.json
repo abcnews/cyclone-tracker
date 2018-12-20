@@ -36,6 +36,7 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-timestamp": "^4.4.0",
+    "svg-path-properties": "^0.4.7",
     "tinycolor2": "^1.4.1",
     "topojson": "^3.0.2"
   }

@@ -4,6 +4,7 @@ const d3 = require('../../d3');
 const select = require('d3-selection');
 const TopoJSON = require('topojson');
 const tinycolor = require('tinycolor2');
+const pathProperties = require('svg-path-properties');
 
 const styles = require('./index.scss');
 const mapJSON = require('./australia.topo.json');
@@ -14,6 +15,68 @@ const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
 const TRANSITION_DURATION = 400;
 
 const BALLOON_HEIGHT = 95;
+
+const arrowImage = require('./arrow.svg');
+
+const findMidPoints = path => {
+  let points = [];
+
+  path = pathProperties.svgPathProperties(path.node().getAttribute('d'));
+
+  const length = path.getTotalLength();
+
+  // Maybe walk along the line and stop if the point is near an observation, then half the distance?
+
+  const step = 0.025;
+  for (let i = step; i <= 1.05 - step; i += step) {
+    const p1 = path.getPointAtLength(i * length);
+    const p2 = path.getPointAtLength(i * length + 1);
+    const angle = (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI;
+
+    points.push({ x: p1.x, y: p1.y, rotation: angle });
+  }
+
+  return points;
+
+  //
+  //
+  //
+
+  // let pairs = path.split(/(?=[LMC])/).map(s => {
+  //   return s
+  //     .replace(/^[LM]/, '')
+  //     .split(',')
+  //     .map(parseFloat);
+  // });
+
+  // let points = [];
+  // for (let i = 1; i < pairs.length; i++) {
+  //   let dx = pairs[i][0] - pairs[i - 1][0];
+  //   let dy = pairs[i][1] - pairs[i - 1][1];
+
+  //   let distance = Math.sqrt(dx * dx + dy * dy);
+  //   if (distance >= 6) {
+  //     let x = pairs[i - 1][0] + dx / 2;
+  //     let y = pairs[i - 1][1] + dy / 2;
+
+  //     let rotation = 180 + Math.atan2(-dy, dx) * (180 / Math.PI);
+
+  //     if (dx >= 0 && -dy <= 0) {
+  //       rotation = 90 - (rotation - 90);
+  //     } else if (dx <= 0 && -dy <= 0) {
+  //       rotation = 180 - rotation;
+  //     } else if (dx <= 0 && -dy >= 0) {
+  //       rotation = 270 - rotation;
+  //     } else if (dx >= 0 && -dy >= 0) {
+  //       rotation = 360 - rotation;
+  //     }
+
+  //     points.push({ x, y, dx, dy, rotation, distance });
+  //   }
+  // }
+
+  // return points;
+};
 
 const { cycloneImages, stroke, fill, labels } = require('./util');
 
@@ -335,10 +398,10 @@ class Map extends React.Component {
     this.path = d3.geoPath().projection(this.projection);
 
     this.svg = d3.select(this.base).append('svg');
-    this.svg
-      .append('defs')
-      .append('pattern')
-      .append('defs')
+
+    this.defs = this.svg.append('defs');
+
+    this.defs
       .append('pattern')
       .attr('id', 'uncertainty' + this.key)
       .attr('width', '1')
@@ -360,7 +423,7 @@ class Map extends React.Component {
     let centerDragStart = null;
     this.svg
       .on('mousedown touchstart', () => {
-        if (window.parent) window.parent.postMessage({ lockScroll: true });
+        if (window.parent) window.parent.postMessage({ lockScroll: true }, '*');
 
         const e = select.event.touches ? select.event.touches[0] : select.event;
 
@@ -390,7 +453,7 @@ class Map extends React.Component {
         );
       })
       .on('mouseup touchend mouseleave', () => {
-        if (window.parent) window.parent.postMessage({ lockScroll: false });
+        if (window.parent) window.parent.postMessage({ lockScroll: false }, '*');
 
         // Don't recenter the map if we are just clicking for a balloon
         if (centerDragStart && Math.abs(centerDragStart.x - this.center[0]) > 5) {
@@ -476,7 +539,23 @@ class Map extends React.Component {
       .append('image')
       .lower()
       .attr('class', styles.cycloneImage)
-      .attr('href', d => cycloneImages[d.properties.category]);
+      .attr('href', d => cycloneImages[d.properties.category])
+      .attr('xlink:href', d => cycloneImages[d.properties.category]);
+
+    // Get all of the midpoints along the lines of the path
+    const trackLines = findMidPoints(this.features.select('path'));
+
+    this.arrows = this.everything.append('g');
+    this.arrows.attr('name', 'arrows');
+    this.arrows
+      .selectAll('image')
+      .data(trackLines)
+      .enter()
+      .append('image')
+      .lower()
+      .attr('class', styles.cycloneImage)
+      .attr('href', arrowImage)
+      .attr('xlink:href', arrowImage); // xlink is for Safari
 
     this.places = this.everything.append('g');
     this.places.attr('name', 'places');
@@ -845,11 +924,23 @@ class Map extends React.Component {
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .style('opacity', 0.8)
-      .attr('href', d => cycloneImages[d.properties.category])
       .attr('x', d => d.x - cycloneSize / 2)
       .attr('y', d => d.y - cycloneSize / 2)
       .attr('width', cycloneSize)
       .attr('height', cycloneSize);
+
+    const trackLines = findMidPoints(this.features.select('path'));
+    const arrowSize = 10 * factor;
+    this.arrows
+      .selectAll('image')
+      .data(trackLines)
+      .transition()
+      .duration(willTransition ? TRANSITION_DURATION : 0)
+      .attr('x', d => d.x - arrowSize / 2)
+      .attr('y', d => d.y - arrowSize / 2)
+      .attr('width', arrowSize)
+      .attr('height', arrowSize)
+      .attr('transform', d => `translate(${d.x}, ${d.y}) rotate(${d.rotation}) translate(-${d.x}, -${d.y})`);
 
     // Render the weather stuff
     this.features
