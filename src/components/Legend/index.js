@@ -9,10 +9,6 @@ class Legend extends React.Component {
     super(props);
 
     this.processData = this.processData.bind(this);
-
-    this.state = {
-      hidden: false
-    };
   }
 
   processData(data) {
@@ -75,15 +71,10 @@ class Legend extends React.Component {
 
     if (!data) return <div />;
 
-    const baseStyle = {
-      transform: this.state.hidden ? `translate(-50%, 90%)` : ''
-    };
-
     const d = this.processData(data.features);
 
     return (
-      <div className={styles.base} onClick={e => this.setState(state => ({ hidden: !state.hidden }))} style={baseStyle}>
-        <div className={styles.hideIndicator} />
+      <div className={styles.base}>
         <div className={styles.title}>{this.props.data.properties.title}</div>
         <div className={styles.info}>
           {d.hasWind && (
