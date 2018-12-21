@@ -543,7 +543,7 @@ class Map extends React.Component {
       .attr('xlink:href', d => cycloneImages[d.properties.category]);
 
     // Get all of the midpoints along the lines of the path
-    const trackLines = findMidPoints(this.features.select('path'));
+    const trackLines = findMidPoints(this.features.select(`path.${styles.track}`));
 
     this.arrows = this.everything.append('g');
     this.arrows.attr('name', 'arrows');
@@ -929,7 +929,7 @@ class Map extends React.Component {
       .attr('width', cycloneSize)
       .attr('height', cycloneSize);
 
-    const trackLines = findMidPoints(this.features.select('path'));
+    const trackLines = findMidPoints(this.features.select(`path.${styles.track}`));
     const arrowSize = 10 * factor;
     this.arrows
       .selectAll('image')
