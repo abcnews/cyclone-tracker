@@ -18,8 +18,8 @@ class Legend extends React.Component {
     let hasVeryDestructiveWinds = false;
 
     let hasWindArea = false;
-    let has24Hours = false;
-    let has48Hours = false;
+    let hasWatchArea = false;
+    let hasWarningArea = false;
 
     let hasLikelyTrack = false;
 
@@ -41,12 +41,12 @@ class Legend extends React.Component {
 
       if (d.properties.areatype === 'Watch Area') {
         hasWindArea = true;
-        has24Hours = true;
+        hasWatchArea = true;
       }
 
       if (d.properties.areatype == 'Warning Area') {
         hasWindArea = true;
-        has48Hours = true;
+        hasWarningArea = true;
       }
 
       if (d.properties.areatype === 'Likely Tracks Area') {
@@ -60,8 +60,8 @@ class Legend extends React.Component {
       hasDestructiveWinds,
       hasVeryDestructiveWinds,
       hasWindArea,
-      has24Hours,
-      has48Hours,
+      hasWatchArea,
+      hasWarningArea,
       hasLikelyTrack
     };
   }
@@ -105,18 +105,18 @@ class Legend extends React.Component {
 
           {d.hasWindArea && (
             <div className={styles.section}>
-              <h3>Gale winds</h3>
-              {d.has24Hours && (
+              <h3>Wind alert</h3>
+              {d.hasWatchArea && (
                 <div>
-                  <div className={styles.area} style={{ background: '#ff9255' }} />
-                  24 hours
+                  <div className={styles.area} style={{ background: '#ffbd55' }} />
+                  Watch area
                 </div>
               )}
 
-              {d.has48Hours && (
+              {d.hasWarningArea && (
                 <div>
-                  <div className={styles.area} style={{ background: '#ffbd55' }} />
-                  24-48 hours
+                  <div className={styles.area} style={{ background: '#ff9255' }} />
+                  Warning area
                 </div>
               )}
             </div>

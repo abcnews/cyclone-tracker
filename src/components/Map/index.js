@@ -56,45 +56,6 @@ const findMidPoints = (path, fixes) => {
   }
 
   return points;
-
-  //
-  //
-  //
-
-  // let pairs = path.split(/(?=[LMC])/).map(s => {
-  //   return s
-  //     .replace(/^[LM]/, '')
-  //     .split(',')
-  //     .map(parseFloat);
-  // });
-
-  // let points = [];
-  // for (let i = 1; i < pairs.length; i++) {
-  //   let dx = pairs[i][0] - pairs[i - 1][0];
-  //   let dy = pairs[i][1] - pairs[i - 1][1];
-
-  //   let distance = Math.sqrt(dx * dx + dy * dy);
-  //   if (distance >= 6) {
-  //     let x = pairs[i - 1][0] + dx / 2;
-  //     let y = pairs[i - 1][1] + dy / 2;
-
-  //     let rotation = 180 + Math.atan2(-dy, dx) * (180 / Math.PI);
-
-  //     if (dx >= 0 && -dy <= 0) {
-  //       rotation = 90 - (rotation - 90);
-  //     } else if (dx <= 0 && -dy <= 0) {
-  //       rotation = 180 - rotation;
-  //     } else if (dx <= 0 && -dy >= 0) {
-  //       rotation = 270 - rotation;
-  //     } else if (dx >= 0 && -dy >= 0) {
-  //       rotation = 360 - rotation;
-  //     }
-
-  //     points.push({ x, y, dx, dy, rotation, distance });
-  //   }
-  // }
-
-  // return points;
 };
 
 const { cycloneImages, stroke, fill, labels } = require('./util');
@@ -1095,7 +1056,7 @@ class Map extends React.Component {
       .attr('y', d => d.y - 10 * factor)
       .attr('rx', 5 * factor)
       .attr('ry', 5 * factor)
-      .attr('width', 100 * factor)
+      .attr('width', 150 * factor)
       .attr('height', 20 * factor)
       .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0))
       .style('stroke-width', 1 * factor);
@@ -1105,9 +1066,9 @@ class Map extends React.Component {
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('font-size', 10 * factor)
       .attr('dy', 4 * factor)
-      .attr('x', d => d.x + 55 * factor)
+      .attr('x', d => d.x + 82 * factor)
       .attr('y', d => d.y)
-      .text(d => format(d.properties.fixtime, 'ddd D/M hA').toUpperCase())
+      .text(d => 'CURRENT: ' + format(d.properties.fixtime, 'ddd D/M hA').toUpperCase())
       .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
 
     this.balloons
