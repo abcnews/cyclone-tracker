@@ -25,8 +25,6 @@ class Cyclone extends React.Component {
   constructor(props) {
     super(props);
 
-    this.copyLink = this.copyLink.bind(this);
-
     this.state = {
       geo: null
     };
@@ -38,11 +36,6 @@ class Cyclone extends React.Component {
     });
   }
 
-  copyLink() {
-    this.input.select();
-    document.execCommand('copy');
-  }
-
   render() {
     const { geo } = this.state;
 
@@ -52,20 +45,15 @@ class Cyclone extends React.Component {
     const current = geo.features.filter(f => f.properties.category && f.properties.fixtype === 'Current')[0];
 
     return (
-      <div onClick={e => this.copyLink()}>
+      <div>
         <div className={styles.title}>
-          {geo.properties.title}
-          {current && ` (Category ${current.properties.category})`}
+          <a href={`https://www.abc.net.au/news/specials/cyclones/?cyclone=${geo.properties.distId}.gml`}>
+            {geo.properties.title}
+            {current && ` (Category ${current.properties.category})`}
+          </a>
         </div>
         <div className={styles.dist}>{geo.properties.distId}</div>
         {watchArea && <div className={styles.description}>{watchArea.properties.extent}</div>}
-        <input
-          readOnly
-          ref={el => (this.input = el)}
-          className={styles.input}
-          defaultValue={`https://www.abc.net.au/news/specials/cyclones/?cyclone=${geo.properties.distId}`}
-        />
-        <div className={styles.help}>Click to copy</div>
       </div>
     );
   }
