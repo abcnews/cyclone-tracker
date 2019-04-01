@@ -1,5 +1,5 @@
 const React = require('react');
-const Timestamp = require('react-timestamp');
+const format = require('date-fns/format');
 const d3 = require('../../d3');
 const GML = require('../../loader');
 const styles = require('./styles.scss');
@@ -11,9 +11,7 @@ class List extends React.Component {
     return (
       <div className={styles.base}>
         <div className={styles.heading}>Current Cyclones</div>
-        <div className={styles.meta}>
-          Updated <Timestamp time={new Date(data.updated)} format="ago" />
-        </div>
+        <div className={styles.meta}>Updated {format(data.updated, 'D MMM YYYY h:mmA')}</div>
         {data.cyclones.length === 0 && <div className={styles.none}>There are no active cyclones.</div>}
         {data.cyclones.map(cyclone => (
           <Cyclone key={cyclone.name} baseUrl={baseUrl} data={cyclone} />

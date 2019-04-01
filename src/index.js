@@ -6,17 +6,21 @@ const d3 = require('./d3');
 const GML = require('./loader');
 
 const PROJECT_NAME = 'cyclone-tracker';
-const BASE_URL = `https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.0.17/`;
+const BASE_URL = `https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.0.18/`;
 
 const getDistId = strings => {
   if (typeof strings === 'string') strings = [strings];
 
-  return strings
+  const distId = strings
     .map(s => {
-      const matches = s.match(/\?cyclone\=([^\.]+\.gml)/);
+      const matches = s.match(/\?cyclone\=([^\.]+(\.gml)?)/);
       return matches && matches[1] ? matches[1] : null;
     })
     .filter(s => s)[0];
+
+  if (distId.indexOf('.gml') === -1) return distId + '.gml';
+
+  return distId;
 };
 
 function init() {
