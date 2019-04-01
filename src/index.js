@@ -6,7 +6,7 @@ const d3 = require('./d3');
 const GML = require('./loader');
 
 const PROJECT_NAME = 'cyclone-tracker';
-const BASE_URL = `https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.0.18/`;
+const BASE_URL = `https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.0.19/`;
 
 const getDistId = strings => {
   if (typeof strings === 'string') strings = [strings];
@@ -18,7 +18,7 @@ const getDistId = strings => {
     })
     .filter(s => s)[0];
 
-  if (distId.indexOf('.gml') === -1) return distId + '.gml';
+  if (distId && distId.indexOf('.gml') === -1) return distId + '.gml';
 
   return distId;
 };
