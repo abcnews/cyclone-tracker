@@ -47,7 +47,7 @@ class Cyclone extends React.Component {
     return (
       <div>
         <div className={styles.title}>
-          <a href={`https://www.abc.net.au/news/specials/cyclones/?cyclone=${geo.properties.distId}.gml`}>
+          <a target="_parent" href={`https://www.abc.net.au/news/specials/cyclones/?cyclone=${geo.properties.distId}`}>
             {geo.properties.title}
             {current && ` (Category ${current.properties.category})`}
           </a>
