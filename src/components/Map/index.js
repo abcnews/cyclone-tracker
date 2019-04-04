@@ -403,8 +403,6 @@ class Map extends React.Component {
     let centerDragStart = null;
     this.svg
       .on('mousedown touchstart', () => {
-        if (window.parent) window.parent.postMessage({ lockScroll: true }, '*');
-
         const e = select.event.touches ? select.event.touches[0] : select.event;
 
         dragStart = {
@@ -421,6 +419,10 @@ class Map extends React.Component {
 
         const e = select.event.touches ? select.event.touches[0] : select.event;
 
+        // Stop drag scrolling on mobile
+        select.event.preventDefault();
+        select.event.stopPropagation();
+
         this.center = [
           centerDragStart.x + (dragStart.x - e.clientX) / this.zoom,
           centerDragStart.y + (dragStart.y - e.clientY) / this.zoom
@@ -433,8 +435,6 @@ class Map extends React.Component {
         );
       })
       .on('mouseup touchend mouseleave', () => {
-        if (window.parent) window.parent.postMessage({ lockScroll: false }, '*');
-
         // Don't recenter the map if we are just clicking for a balloon
         if (centerDragStart && Math.abs(centerDragStart.x - this.center[0]) > 5) {
           this.canCreateBalloon = setTimeout(() => {
@@ -843,7 +843,7 @@ class Map extends React.Component {
       this.center = center;
     }
 
-    const transform = `translate(${this.width / 2}, ${this.height / 2}) scale(${zoom}) translate(${-this
+    const transform = `translate(${this.width / 2}, ${(this.height * 0.6) / 2}) scale(${zoom}) translate(${-this
       .center[0]}, ${-this.center[1]})`;
 
     if (willTransition) {

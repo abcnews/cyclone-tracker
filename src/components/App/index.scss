@@ -1,6 +1,15 @@
 .base {
   position: relative;
   overflow: hidden;
+
+  width: 100%;
+  height: 500px;
+}
+
+@media screen and (max-width: 440px) {
+  .base {
+    height: 60vh;
+  }
 }
 
 .toolbar {

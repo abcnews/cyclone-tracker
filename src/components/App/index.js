@@ -15,15 +15,6 @@ class App extends React.Component {
   }
 
   render() {
-    //<div className={styles.title}>{this.props.data.properties.title}</div>
-
-    //<button onClick={e => this.setState(state => ({ zoom: null, center: '' }))}>Default</button>
-    // <button onClick={e => this.setState(state => ({ center: 'Brisbane' }))}>Brisbane</button>
-
-    // <button onClick={e => this.setState(state => ({ center: (state.center = 'current') }))}>
-    //   Center on current fix
-    // </button>
-
     return (
       <div className={styles.base}>
         <Map
