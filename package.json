@@ -1,6 +1,6 @@
 {
 	"name": "cyclone-tracker",
-	"version": "3.0.21",
+	"version": "3.0.22",
 	"description": "Renders a given cyclone on a map of Australia",
 	"license": "MIT",
 	"private": true,
