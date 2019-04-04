@@ -33,16 +33,16 @@ function init() {
       )
     )
     .forEach(a => {
+      const mountNode = document.createElement('div');
+      // Find the nearest parent with the extended link embed class
+      const replace = a.closest('.view-external-link-embedded') || a;
+      replace.parentElement.insertBefore(mountNode, replace);
+      replace.parentElement.removeChild(replace);
+
       if (document.location.search && document.location.search.indexOf('cyclone') > -1) {
         const distId = getDistId(document.location.search);
         const url =
           distId === 'example.gml' ? 'example.gml' : `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${distId}`;
-        const mountNode = document.createElement('div');
-
-        // Find the nearest parent with the extended link embed class
-        const replace = a.closest('.view-external-link-embedded') || a;
-        replace.parentElement.insertBefore(mountNode, replace);
-        replace.parentElement.removeChild(replace);
 
         // Load the cylone from the query param
         d3.xml(url, (err, xml) => {
@@ -61,7 +61,7 @@ function init() {
         d3.json(baseUrl + '/cyclones.json', (err, json) => {
           // Show the actual list of cyclones
           const List = require('./components/List');
-          render(<List baseUrl={baseUrl} data={json} />, root);
+          render(<List baseUrl={baseUrl} data={json} />, mountNode);
         });
       }
     });

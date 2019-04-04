@@ -47,13 +47,13 @@ class Cyclone extends React.Component {
     return (
       <div>
         <div className={styles.title}>
-          <a target="_parent" href={`https://www.abc.net.au/news/specials/cyclones/?cyclone=${geo.properties.distId}`}>
+          <a href={`https://www.abc.net.au/news/specials/cyclones/?cyclone=${geo.properties.distId}`}>
             {geo.properties.title}
             {current && ` (Category ${current.properties.category})`}
           </a>
         </div>
         <div className={styles.dist}>{geo.properties.distId}</div>
-        {watchArea && <div className={styles.description}>{watchArea.properties.extent}</div>}
+        {watchArea && <div className={styles.description}>Watch area: {watchArea.properties.extent}</div>}
       </div>
     );
   }
