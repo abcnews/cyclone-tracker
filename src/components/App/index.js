@@ -10,20 +10,33 @@ class App extends React.Component {
 
     this.state = {
       center: '',
-      zoom: null
+      zoom: null,
+      width: 10,
+      height: 10
     };
+  }
+
+  componentDidMount() {
+    if (this.base) {
+      const { width, height } = this.base.getBoundingClientRect();
+      this.setState(() => ({ width, height }));
+    }
   }
 
   render() {
     return (
-      <div className={styles.base}>
-        <Map
-          data={this.props.data}
-          zoom={this.state.zoom}
-          onAutoZoom={zoom => this.setState(state => ({ zoom }))}
-          index={this.props.index}
-          center={this.state.center}
-        />
+      <div className={styles.base} ref={el => (this.base = el)}>
+        {this.base && (
+          <Map
+            data={this.props.data}
+            zoom={this.state.zoom}
+            onAutoZoom={zoom => this.setState(state => ({ zoom }))}
+            index={this.props.index}
+            center={this.state.center}
+            width={this.state.width}
+            height={this.state.height}
+          />
+        )}
 
         <div className={styles.toolbar}>
           <button

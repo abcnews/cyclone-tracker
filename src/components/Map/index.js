@@ -843,7 +843,7 @@ class Map extends React.Component {
       this.center = center;
     }
 
-    const transform = `translate(${this.width / 2}, ${(this.height * 0.6) / 2}) scale(${zoom}) translate(${-this
+    const transform = `translate(${this.width / 2}, ${this.height / 2}) scale(${zoom}) translate(${-this
       .center[0]}, ${-this.center[1]})`;
 
     if (willTransition) {
