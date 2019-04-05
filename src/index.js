@@ -39,8 +39,8 @@ function init() {
       replace.parentElement.insertBefore(mountNode, replace);
       replace.parentElement.removeChild(replace);
 
-      if (document.location.search && document.location.search.indexOf('cyclone') > -1) {
-        const distId = getDistId(document.location.search);
+      if (a.href.indexOf('cyclone=') > -1) {
+        const distId = getDistId(a.href.split('?')[0]);
         const url =
           distId === 'example.gml' ? 'example.gml' : `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${distId}`;
 
