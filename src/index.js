@@ -8,6 +8,16 @@ const GML = require('./loader');
 const PROJECT_NAME = 'cyclone-tracker';
 const root = document.querySelector(`[data-${PROJECT_NAME}-root]`);
 
+const detectDistId = href => {
+  if (href.indexOf('cyclone=') > -1) {
+    return getDistId('?' + href.split('?')[1]);
+  } else if (document.location.search && document.location.search.indexOf('cyclone=')) {
+    return getDistId(document.location.search);
+  }
+
+  return false;
+};
+
 const getDistId = strings => {
   if (typeof strings === 'string') strings = [strings];
 
@@ -39,11 +49,10 @@ function init() {
       replace.parentElement.insertBefore(mountNode, replace);
       replace.parentElement.removeChild(replace);
 
-      if (a.href.indexOf('cyclone=') > -1) {
-        const distId = getDistId('?' + a.href.split('?')[1]);
+      const distId = detectDistId(a.href);
+      if (distId) {
         const url =
           distId === 'example.gml' ? 'example.gml' : `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${distId}`;
-
         // Load the cylone from the query param
         d3.xml(url, (err, xml) => {
           const data = GML.parse(xml);
