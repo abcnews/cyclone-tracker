@@ -40,7 +40,7 @@ function init() {
       replace.parentElement.removeChild(replace);
 
       if (a.href.indexOf('cyclone=') > -1) {
-        const distId = getDistId(a.href.split('?')[0]);
+        const distId = getDistId('?' + a.href.split('?')[1]);
         const url =
           distId === 'example.gml' ? 'example.gml' : `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${distId}`;
 
