@@ -920,7 +920,7 @@ class Map extends React.Component {
       .attr('y', d => d.y - arrowSize / 2)
       .attr('width', arrowSize)
       .attr('height', arrowSize)
-      .attr('transform', d => `translate(${d.x}, ${d.y}) rotate(${d.rotation}) translate(-${d.x}, -${d.y})`);
+      .attr('transform', d => `translate(${d.x}, ${d.y}) rotate(${d.rotation}) translate(${-d.x}, ${-d.y})`);
 
     // Render the weather stuff
     this.features
