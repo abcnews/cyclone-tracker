@@ -43,12 +43,12 @@ class App extends React.Component {
 
         <div className={styles.toolbar}>
           <button
-            disabled={this.state.zoom === 8}
+            disabled={this.state.zoom >= 8}
             onClick={e => this.setState(state => ({ zoom: Math.min((state.zoom || 1) * 2, 8) }))}>
             +
           </button>
           <button
-            disabled={this.state.zoom === 1}
+            disabled={this.state.zoom <= 1}
             onClick={e => this.setState(state => ({ zoom: Math.max((state.zoom || 1) / 2, 1) }))}>
             -
           </button>

@@ -318,7 +318,7 @@ class Map extends React.Component {
   }
 
   onResize() {
-    this.updateGraph(this.props);
+    this.updateGraph(this.props, true, true, true);
   }
 
   getCities(props, zoom) {
@@ -774,9 +774,12 @@ class Map extends React.Component {
    * Update the values on the map
    * @param {object} props
    * @param {boolean?} willTransition
+   * @param {boolean?} recenter
+   * @param {boolean?} updateZoom
    */
-  updateGraph(props, willTransition, recenter) {
+  updateGraph(props, willTransition, recenter, updateZoom) {
     willTransition = typeof willTransition === 'undefined' ? true : willTransition;
+    updateZoom = typeof updateZoom === 'undefined' ? false : updateZoom;
 
     const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
 
@@ -789,7 +792,7 @@ class Map extends React.Component {
     }
 
     let zoom = props.zoom;
-    if (!zoom && area) {
+    if ((!zoom || updateZoom) && area) {
       var b = this.path.bounds(area);
       zoom = 0.6 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
       this.props.onAutoZoom(zoom);
