@@ -82,7 +82,7 @@ class Map extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const recenter = nextProps.center !== this.props.center;
-    this.updateGraph(nextProps, true, recenter);
+    this.updateGraph(nextProps, { willTransition: true, recenter });
   }
 
   shouldComponentUpdate() {
@@ -92,7 +92,7 @@ class Map extends React.Component {
   componentDidMount() {
     if (this.props.data) {
       this.initGraph(this.props);
-      this.updateGraph(this.props, false);
+      this.updateGraph(this.props);
     }
 
     window.addEventListener('resize', this.onResize);
@@ -241,7 +241,7 @@ class Map extends React.Component {
 
     this.popupIndex = null;
     this.center = [x, y];
-    this.updateGraph(this.props, true, false);
+    this.updateGraph(this.props, { willTransition: true });
 
     if (!parentGroup) parentGroup = this.fixes;
 
@@ -318,7 +318,11 @@ class Map extends React.Component {
   }
 
   onResize() {
-    this.updateGraph(this.props);
+    this.updateGraph(this.props, {
+      willTransition: this.props.embedded,
+      recenter: this.props.embedded,
+      updateZoom: this.props.embedded
+    });
   }
 
   getCities(props, zoom) {
@@ -556,7 +560,7 @@ class Map extends React.Component {
 
         this.popupIndex = d.index;
         this.center = [d.x, d.y];
-        this.updateGraph(this.props, true, false);
+        this.updateGraph(this.props, { willTransition: true});
       })
       .style('cursor', 'pointer');
 
@@ -615,7 +619,7 @@ class Map extends React.Component {
 
         this.popupIndex = d.index;
         this.center = [d.x, d.y];
-        this.updateGraph(this.props, true, false);
+        this.updateGraph(this.props, { willTransition: true});
       })
       .style('cursor', 'pointer');
 
@@ -686,7 +690,7 @@ class Map extends React.Component {
       .attr('fill', 'white')
       .on('click', d => {
         this.popupIndex = null;
-        this.updateGraph(this.props, true, false);
+        this.updateGraph(this.props, { willTransition: true});
       });
 
     this.balloons
@@ -761,25 +765,46 @@ class Map extends React.Component {
       .text('x')
       .style('cursor', 'pointer');
 
-    this.width = props.width || window.innerWidth;
-    this.height = props.height || window.innerHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    if (!this.props.embedded) {
+      this.width = props.width || this.width;
+      this.height = props.height || this.height;
+    }
   }
 
   /**
    * Update the values on the map
    * @param {object} props
-   * @param {boolean?} willTransition
+   * @param {boolean?} options.willTransition
+   * @param {boolean?} options.recenter
+   * @param {boolean?} options.updateZoom
    */
-  updateGraph(props, willTransition, recenter) {
-    willTransition = typeof willTransition === 'undefined' ? true : willTransition;
+  updateGraph(props, options) {
+    const { willTransition, recenter, updateZoom } = options || {};
+    console.log(willTransition, recenter, updateZoom);
 
-    const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
+    const {
+      data,
+      areaData,
+      cycloneData,
+      weatherData,
+      fixData,
+      area,
+      centerArea
+    } = this.processData(props);
 
-    this.width = props.width || window.innerWidth;
-    this.height = props.height || window.innerHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    if (!this.props.embedded) {
+      this.width = props.width || this.width;
+      this.height = props.height || this.height;
+    }
 
     let zoom = props.zoom;
-    if (!zoom && area) {
+    if ((!zoom || updateZoom) && area) {
       var b = this.path.bounds(area);
       zoom = 0.6 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
       this.props.onAutoZoom(zoom);

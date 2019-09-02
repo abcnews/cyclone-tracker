@@ -43,7 +43,7 @@ function init() {
     // Load in a cyclone based on the `cyclone` URL parameter
     d3.xml(url, (err, xml) => {
       const data = GML.parse(xml);
-      render(<App data={data} />, root);
+      render(<App data={data} embedded />, root);
     });
 
   } else {

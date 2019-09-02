@@ -24,11 +24,14 @@ class App extends React.Component {
   }
 
   render() {
+    const classNames = [styles.base, this.props.embedded ? styles.embedded : ""];
+
     return (
-      <div className={styles.base} ref={el => (this.base = el)}>
+      <div className={classNames.join(" ")} ref={el => (this.base = el)}>
         {this.base && (
           <Map
             data={this.props.data}
+            embedded={this.props.embedded}
             zoom={this.state.zoom}
             onAutoZoom={zoom => this.setState(state => ({ zoom }))}
             index={this.props.index}
@@ -40,12 +43,12 @@ class App extends React.Component {
 
         <div className={styles.toolbar}>
           <button
-            disabled={this.state.zoom === 8}
+            disabled={this.state.zoom >= 8}
             onClick={e => this.setState(state => ({ zoom: Math.min((state.zoom || 1) * 2, 8) }))}>
             +
           </button>
           <button
-            disabled={this.state.zoom === 1}
+            disabled={this.state.zoom <= 1}
             onClick={e => this.setState(state => ({ zoom: Math.max((state.zoom || 1) / 2, 1) }))}>
             -
           </button>
