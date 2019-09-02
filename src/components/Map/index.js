@@ -761,8 +761,13 @@ class Map extends React.Component {
       .text('x')
       .style('cursor', 'pointer');
 
-    this.width = props.width || window.innerWidth;
-    this.height = props.height || window.innerHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    if (!this.props.embedded) {
+      this.width = props.width || this.width;
+      this.height = props.height || this.height;
+    }
   }
 
   /**
@@ -775,8 +780,13 @@ class Map extends React.Component {
 
     const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
 
-    this.width = props.width || window.innerWidth;
-    this.height = props.height || window.innerHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    if (!this.props.embedded) {
+      this.width = props.width || this.width;
+      this.height = props.height || this.height;
+    }
 
     let zoom = props.zoom;
     if (!zoom && area) {

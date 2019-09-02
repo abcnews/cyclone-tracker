@@ -24,11 +24,14 @@ class App extends React.Component {
   }
 
   render() {
+    const classNames = [styles.base, this.props.embedded ? styles.embedded : ""];
+
     return (
-      <div className={styles.base} ref={el => (this.base = el)}>
+      <div className={classNames.join(" ")} ref={el => (this.base = el)}>
         {this.base && (
           <Map
             data={this.props.data}
+            embedded={this.props.embedded}
             zoom={this.state.zoom}
             onAutoZoom={zoom => this.setState(state => ({ zoom }))}
             index={this.props.index}
