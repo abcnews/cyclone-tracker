@@ -783,7 +783,6 @@ class Map extends React.Component {
    */
   updateGraph(props, options) {
     const { willTransition, recenter, updateZoom } = options || {};
-    console.log(willTransition, recenter, updateZoom);
 
     const {
       data,
