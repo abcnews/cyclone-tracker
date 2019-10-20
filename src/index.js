@@ -45,9 +45,7 @@ function init() {
       const data = GML.parse(xml);
       render(<App data={data} embedded />, root);
     });
-
   } else {
-
     [].slice
       .call(
         document.querySelectorAll(
@@ -64,7 +62,9 @@ function init() {
         const distId = detectDistId(a.href);
         if (distId) {
           const url =
-            distId === 'example.gml' ? 'example.gml' : `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${distId}`;
+            distId === 'example.gml'
+              ? `//www.abc.net.au/res/sites/news-projects/cyclone-tracker/master/example.gml`
+              : `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${distId}`;
           // Load the cylone from the query param
           d3.xml(url, (err, xml) => {
             const data = GML.parse(xml);
