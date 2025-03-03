@@ -2,7 +2,8 @@ const React = require('react');
 const format = require('date-fns/format');
 const d3 = require('../../d3');
 const GML = require('../../loader');
-const styles = require('./styles.scss');
+const stylesModule = require('./styles.scss');
+const styles = stylesModule.default;
 
 class List extends React.Component {
   render() {

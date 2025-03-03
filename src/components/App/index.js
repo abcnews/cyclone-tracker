@@ -2,7 +2,8 @@ const React = require('react');
 const Map = require('../Map');
 const Legend = require('../Legend');
 
-const styles = require('./index.scss');
+const stylesModule = require('./index.scss');
+const styles = stylesModule.default;
 
 class App extends React.Component {
   constructor(props) {

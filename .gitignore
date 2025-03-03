@@ -3,8 +3,7 @@
 
 # builds
 /build
-/.build
-/.deploy
+/.aunty
 
 # misc
 .DS_Store
