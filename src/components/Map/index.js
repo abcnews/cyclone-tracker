@@ -168,7 +168,7 @@ class Map extends React.Component {
       }
     });
 
-    area = ((forecastLine || centerArea) ? [ forecastLine, centerArea] : [fallbackCenterArea])
+    area = ((forecastLine) ? [ forecastLine] : [fallbackCenterArea])
       .filter(a => a)
       .reduce(
         (line, current) => {
@@ -805,6 +805,7 @@ class Map extends React.Component {
     let zoom = props.zoom;
     if ((!zoom || updateZoom) && area) {
       var b = this.path.bounds(area);
+      console.log(area)
       zoom = 0.6 / Math.max((b[1][0] - b[0][0]) / this.width, (b[1][1] - b[0][1]) / this.height);
       this.props.onAutoZoom(zoom);
     }
@@ -841,30 +842,12 @@ class Map extends React.Component {
     if (!this.center || recenter) {
 
       let center;
-      if (data.length > 0) {
-        if (props.center === 'current') {
-          const current = props.data.features.filter(f => f.properties.fixtype === 'Current')[0];
-          if (current) {
-            center = this.path.centroid(current);
-          }
-        } else if (props.center !== '') {
-          const city = citiesJSON.features.filter(
-            f => f.properties.name.toLowerCase() === props.center.toLowerCase()
-          )[0];
-          if (city) {
-            center = this.path.centroid(city);
-          }
-        }
-      }
-      if (!center) {
-        if (area) {
-          center = this.path.centroid(area);
-          center[1] += 25;
-        } else {
-          center = this.path.centroid({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[136, -27]] } });
-          zoom = 1;
-          factor = 1;
-        }
+      if (area) {
+        center = this.path.centroid(area);
+      } else {
+        center = this.path.centroid({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[136, -27]] } });
+        zoom = 1;
+        factor = 1;
       }
       this.center = center;
     }
