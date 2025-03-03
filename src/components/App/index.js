@@ -10,7 +10,7 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      center: '',
+      center: 'current',
       zoom: null,
       width: 10,
       height: 10

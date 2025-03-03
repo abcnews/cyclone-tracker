@@ -168,8 +168,7 @@ class Map extends React.Component {
       }
     });
 
-    // TODO: change this to focus on the forecast area
-    area = [fallbackCenterArea, forecastLine, centerArea]
+    area = ((forecastLine || centerArea) ? [ forecastLine, centerArea] : [fallbackCenterArea])
       .filter(a => a)
       .reduce(
         (line, current) => {
@@ -837,8 +836,10 @@ class Map extends React.Component {
 
     this.centerArea = centerArea;
 
+
     // Work out where the center of the map is
     if (!this.center || recenter) {
+
       let center;
       if (data.length > 0) {
         if (props.center === 'current') {
