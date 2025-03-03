@@ -19,8 +19,12 @@ class App extends React.Component {
 
   componentDidMount() {
     if (this.base) {
-      const { width, height } = this.base.getBoundingClientRect();
-      this.setState(() => ({ width, height }));
+      const resizeObserver = new ResizeObserver((entries) => {
+        const { width, height } = this.base.getBoundingClientRect();
+        this.setState(() => ({ width, height }));
+      });
+
+      resizeObserver.observe(this.base);
     }
   }
 
@@ -28,20 +32,21 @@ class App extends React.Component {
     const classNames = [styles.base, this.props.embedded ? styles.embedded : ""];
 
     return (
-      <div className={classNames.join(" ")} ref={el => (this.base = el)}>
-        {this.base && (
-          <Map
-            data={this.props.data}
-            embedded={this.props.embedded}
-            zoom={this.state.zoom}
-            onAutoZoom={zoom => this.setState(state => ({ zoom }))}
-            index={this.props.index}
-            center={this.state.center}
-            width={this.state.width}
-            height={this.state.height}
-          />
-        )}
-
+      <div className={classNames.join(" ")} >
+        <div className={styles['base__map']} ref={el => (this.base = el)}>
+          {this.base && (
+            <Map
+              data={this.props.data}
+              embedded={this.props.embedded}
+              zoom={this.state.zoom}
+              onAutoZoom={zoom => this.setState(state => ({ zoom }))}
+              index={this.props.index}
+              center={this.state.center}
+              width={this.state.width}
+              height={this.state.height}
+            />
+          )}
+        </div>
         <div className={styles.toolbar}>
           <button
             disabled={this.state.zoom >= 8}

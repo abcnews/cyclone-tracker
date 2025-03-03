@@ -765,8 +765,8 @@ class Map extends React.Component {
       .text('x')
       .style('cursor', 'pointer');
 
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
+    this.width = props.width;
+    this.height = props.height;
 
     if (!this.props.embedded) {
       this.width = props.width || this.width;
@@ -794,8 +794,8 @@ class Map extends React.Component {
       centerArea
     } = this.processData(props);
 
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
+    this.width = props.width;
+    this.height = props.height;
 
     if (!this.props.embedded) {
       this.width = props.width || this.width;
@@ -936,7 +936,7 @@ class Map extends React.Component {
       .attr('height', cycloneSize);
 
     const trackLines = findMidPoints(this.features.select(`path.${styles.track}`), fixData);
-    const arrowSize = 13 * factor;
+    const arrowSize = 4;
     this.arrows
       .selectAll('image')
       .data(trackLines)
@@ -955,12 +955,17 @@ class Map extends React.Component {
       .transition()
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('d', this.path)
-      .style('stroke-width', 2 * factor)
+      .style('stroke-width', d => {
+        if(d.properties.windtype){
+          return .5;
+        }
+        return 3;
+      })
       .style('stroke-dasharray', d => {
         if (d.properties.tracktype === 'Forecast') {
-          return `${9 * factor} ${5 * factor}`;
+          return `${9} ${5}`;
         } else if (d.properties.tracktype) {
-          return `${13 * factor} ${1 * factor}`;
+          return `${13} ${1}`;
         }
       })
       .style('animation', 'marching 1.8s linear infinite');

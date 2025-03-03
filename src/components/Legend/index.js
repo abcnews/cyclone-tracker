@@ -75,6 +75,7 @@ class Legend extends React.Component {
     const d = this.processData(data.features);
 
     return (
+      <div className={styles.container}>
       <div className={styles.base}>
         <div className={styles.title}>{this.props.data.properties.title}</div>
         <div className={styles.info}>
@@ -134,6 +135,7 @@ class Legend extends React.Component {
         <div className={styles.footer}>
           Updated {format(data.properties.issueTimeABC, 'D MMM YYYY h:mmA')}. Source: Bureau of Meteorology.
         </div>
+      </div>
       </div>
     );
   }

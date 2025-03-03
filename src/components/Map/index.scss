@@ -13,3 +13,7 @@
   stroke-dashoffset: 0;
   pointer-events: none;
 }
+
+.base path {
+  vector-effect: non-scaling-stroke;
+}
