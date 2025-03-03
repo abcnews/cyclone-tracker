@@ -1,5 +1,4 @@
 require('es6-promise/auto');
-
 const React = require('react');
 const { render } = require('react-dom');
 const d3 = require('./d3');
@@ -35,7 +34,6 @@ const getDistId = strings => {
 
 function init() {
   const App = require('./components/App');
-
   if (root && detectDistId()) {
     const distId = detectDistId();
 
@@ -90,21 +88,3 @@ function init() {
 }
 
 init();
-
-// POLYFILLS
-
-if (!Element.prototype.matches) {
-  Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
-}
-
-if (!Element.prototype.closest) {
-  Element.prototype.closest = function(s) {
-    var el = this;
-    if (!document.documentElement.contains(el)) return null;
-    do {
-      if (el.matches(s)) return el;
-      el = el.parentElement || el.parentNode;
-    } while (el !== null && el.nodeType === 1);
-    return null;
-  };
-}

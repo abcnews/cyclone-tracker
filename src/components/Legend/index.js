@@ -1,7 +1,8 @@
 const React = require('react');
 const format = require('date-fns/format');
 
-const styles = require('./index.scss');
+const stylesModule = require('./index.scss');
+const styles = stylesModule.default;
 const cyclonePath = require('./cyclone-path.png');
 
 class Legend extends React.Component {

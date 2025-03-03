@@ -5,8 +5,8 @@ const select = require('d3-selection');
 const TopoJSON = require('topojson');
 const tinycolor = require('tinycolor2');
 const pathProperties = require('svg-path-properties');
-
-const styles = require('./index.scss');
+const styleModule = require('./index.scss');
+const styles = styleModule.default
 const mapJSON = require('./australia.topo.json');
 const mapData = TopoJSON.feature(mapJSON, mapJSON.objects.australia).features;
 const citiesJSON = require('./cities.topo.json');
@@ -168,8 +168,7 @@ class Map extends React.Component {
       }
     });
 
-    // TODO: change this to focus on the forecast area
-    area = [fallbackCenterArea, forecastLine, centerArea]
+    area = ((forecastLine || centerArea) ? [ forecastLine, centerArea] : [fallbackCenterArea])
       .filter(a => a)
       .reduce(
         (line, current) => {
@@ -526,6 +525,7 @@ class Map extends React.Component {
       .attr('href', d => cycloneImages[d.properties.category])
       .attr('xlink:href', d => cycloneImages[d.properties.category]);
 
+
     // Get all of the midpoints along the lines of the path
     const trackLines = findMidPoints(this.features.select(`path.${styles.track}`), fixData);
 
@@ -836,8 +836,10 @@ class Map extends React.Component {
 
     this.centerArea = centerArea;
 
+
     // Work out where the center of the map is
     if (!this.center || recenter) {
+
       let center;
       if (data.length > 0) {
         if (props.center === 'current') {

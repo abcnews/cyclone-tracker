@@ -1,42 +1,42 @@
 {
-	"name": "cyclone-tracker",
-	"version": "3.2.3",
-	"description": "Renders a given cyclone on a map of Australia",
-	"license": "MIT",
-	"private": true,
-	"contributors": [
-		"Nathan Hoad <nathan@nathanhoad.net>"
-	],
-	"aunty": "react",
-	"scripts": {
-		"start": "aunty serve",
-		"test": "jest"
-	},
-	"jest": {
-		"transform": {
-			".*": "<rootDir>/node_modules/@abcnews/aunty/src/utils/jest"
-		}
-	},
-	"devDependencies": {
-		"@abcnews/aunty": "^10.3.1",
-		"babel-preset-env": "^1.6.1",
-		"babel-preset-react": "^6.24.1",
-		"jest": "^21.2.1",
-		"react-test-renderer": "^16.2.0"
-	},
-	"dependencies": {
-		"d3-geo": "^1.9.1",
-		"d3-request": "^1.0.6",
-		"d3-selection": "^1.2.0",
-		"d3-transition": "^1.1.1",
-		"date-fns": "^1.29.0",
-		"es6-promise": "^4.2.2",
-		"lodash": "^4.17.4",
-		"object-assign": "^4.1.1",
-		"react": "^16.2.0",
-		"react-dom": "^16.2.0",
-		"svg-path-properties": "^0.4.7",
-		"tinycolor2": "^1.4.1",
-		"topojson": "^3.0.2"
-	}
+  "name": "cyclone-tracker",
+  "version": "3.2.3",
+  "description": "Renders a given cyclone on a map of Australia",
+  "license": "MIT",
+  "private": true,
+  "contributors": [
+    "Nathan Hoad <nathan@nathanhoad.net>"
+  ],
+  "aunty": "react",
+  "scripts": {
+    "start": "aunty serve",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      ".*": "<rootDir>/node_modules/@abcnews/aunty/src/utils/jest"
+    }
+  },
+  "devDependencies": {
+    "@abcnews/aunty": "^16.0.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "jest": "^21.2.1",
+    "react-test-renderer": "^16.2.0"
+  },
+  "dependencies": {
+    "d3-geo": "^1.9.1",
+    "d3-request": "^1.0.6",
+    "d3-selection": "^1.2.0",
+    "d3-transition": "^1.1.1",
+    "date-fns": "^1.29.0",
+    "es6-promise": "^4.2.2",
+    "lodash": "^4.17.4",
+    "object-assign": "^4.1.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "svg-path-properties": "^0.4.7",
+    "tinycolor2": "^1.4.1",
+    "topojson": "^3.0.2"
+  }
 }
