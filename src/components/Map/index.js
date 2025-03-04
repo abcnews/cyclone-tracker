@@ -367,7 +367,6 @@ class Map extends React.Component {
 
           const isClose = Math.abs(current.x - other.x) < xClose || Math.abs(current.y - other.y) < yClose;
           if (isClose && current.properties.population < other.properties.population) {
-            console.log('is close', current.x * factor, other.x * factor);
             r = null;
           }
         });
