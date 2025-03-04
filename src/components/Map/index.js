@@ -6,7 +6,7 @@ const TopoJSON = require('topojson');
 const tinycolor = require('tinycolor2');
 const pathProperties = require('svg-path-properties');
 const styleModule = require('./index.scss');
-const styles = styleModule.default
+const styles = styleModule.default;
 const mapJSON = require('./australia.topo.json');
 const mapData = TopoJSON.feature(mapJSON, mapJSON.objects.australia).features;
 const citiesJSON = require('./cities.topo.json');
@@ -168,7 +168,7 @@ class Map extends React.Component {
       }
     });
 
-    area = ((forecastLine) ? [ forecastLine] : [fallbackCenterArea])
+    area = (forecastLine ? [forecastLine] : [fallbackCenterArea])
       .filter(a => a)
       .reduce(
         (line, current) => {
@@ -245,10 +245,7 @@ class Map extends React.Component {
     if (!parentGroup) parentGroup = this.fixes;
 
     // create a new group on the given group
-    const balloon = parentGroup
-      .append('g')
-      .attr('class', 'popup')
-      .attr('fill', 'white');
+    const balloon = parentGroup.append('g').attr('class', 'popup').attr('fill', 'white');
 
     const lines = this.getWrappedText(text, 145);
     const width = 190;
@@ -331,20 +328,31 @@ class Map extends React.Component {
     const distance = 40;
 
     const bounds = this.path.bounds(this.centerArea);
-    return citiesJSON.features
-      .map(c => {
-        c.x = this.path.centroid(c)[0] + 8 * factor;
-        c.y = this.path.centroid(c)[1] + 4 * factor;
-        return c;
-      })
-      .filter(c => {
-        if (c.x < bounds[0][0] - distance) return false;
-        if (c.x > bounds[1][0] + distance) return false;
-        if (c.y < bounds[0][1] - distance) return false;
-        if (c.y > bounds[1][1] + distance) return false;
 
-        return true;
-      })
+    const targetCities = citiesJSON.features.filter(city => {
+      return this.props.cities.length === 0 || this.props.cities.includes(city.properties.id);
+    });
+
+    const citiesWithCoords = targetCities.map(c => {
+      c.x = this.path.centroid(c)[0];
+      c.y = this.path.centroid(c)[1];
+      return c;
+    });
+
+    citiesWithCoords.forEach(city => console.log(...[city.properties.name, city.x, city.y]));
+
+    const citiesInBounds = this.props.cities
+      ? citiesWithCoords
+      : citiesWithCoords.filter(c => {
+          if (c.x < bounds[0][0] - distance) return false;
+          if (c.x > bounds[1][0] + distance) return false;
+          if (c.y < bounds[0][1] - distance) return false;
+          if (c.y > bounds[1][1] + distance) return false;
+
+          return true;
+        });
+
+    const filteredCities = citiesInBounds
       .sort((a, b) => {
         return a.properties.population > b.properties.population ? -1 : 1;
       })
@@ -355,8 +363,11 @@ class Map extends React.Component {
         array.forEach(other => {
           if (!other) return;
 
-          const isClose = Math.abs(current.x - other.x) < 7 * factor || Math.abs(current.y - other.y) < 7 * factor;
+          const [xClose, yClose] = factor <= 0.2 ? [2.2 * factor, 5 * factor] : [4 * factor, 5 * factor];
+
+          const isClose = Math.abs(current.x - other.x) < xClose || Math.abs(current.y - other.y) < yClose;
           if (isClose && current.properties.population < other.properties.population) {
+            console.log('is close', current.x * factor, other.x * factor);
             r = null;
           }
         });
@@ -364,6 +375,7 @@ class Map extends React.Component {
         return r;
       })
       .filter(c => c);
+    return filteredCities;
   }
 
   /**
@@ -373,10 +385,7 @@ class Map extends React.Component {
   initGraph(props) {
     if (!this.base) return;
 
-    this.projection = d3
-      .geoMercator()
-      .scale(900)
-      .center([136, -27]);
+    this.projection = d3.geoMercator().scale(900).center([136, -27]);
 
     this.path = d3.geoPath().projection(this.projection);
 
@@ -525,7 +534,6 @@ class Map extends React.Component {
       .attr('href', d => cycloneImages[d.properties.category])
       .attr('xlink:href', d => cycloneImages[d.properties.category]);
 
-
     // Get all of the midpoints along the lines of the path
     const trackLines = findMidPoints(this.features.select(`path.${styles.track}`), fixData);
 
@@ -560,7 +568,7 @@ class Map extends React.Component {
 
         this.popupIndex = d.index;
         this.center = [d.x, d.y];
-        this.updateGraph(this.props, { willTransition: true});
+        this.updateGraph(this.props, { willTransition: true });
       })
       .style('cursor', 'pointer');
 
@@ -619,7 +627,7 @@ class Map extends React.Component {
 
         this.popupIndex = d.index;
         this.center = [d.x, d.y];
-        this.updateGraph(this.props, { willTransition: true});
+        this.updateGraph(this.props, { willTransition: true });
       })
       .style('cursor', 'pointer');
 
@@ -690,7 +698,7 @@ class Map extends React.Component {
       .attr('fill', 'white')
       .on('click', d => {
         this.popupIndex = null;
-        this.updateGraph(this.props, { willTransition: true});
+        this.updateGraph(this.props, { willTransition: true });
       });
 
     this.balloons
@@ -784,15 +792,7 @@ class Map extends React.Component {
   updateGraph(props, options) {
     const { willTransition, recenter, updateZoom } = options || {};
 
-    const {
-      data,
-      areaData,
-      cycloneData,
-      weatherData,
-      fixData,
-      area,
-      centerArea
-    } = this.processData(props);
+    const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
 
     this.width = props.width;
     this.height = props.height;
@@ -812,10 +812,7 @@ class Map extends React.Component {
 
     let factor = 1 / (zoom || 1);
 
-    this.svg
-      .attr('width', this.width)
-      .attr('height', this.height)
-      .style('background', '#efefef');
+    this.svg.attr('width', this.width).attr('height', this.height).style('background', '#efefef');
     this.svg
       .select('#uncertainty' + this.key)
       .transition()
@@ -830,16 +827,14 @@ class Map extends React.Component {
       .attr('transform', `translate(${1.7 * factor},${1.7 * factor})`);
     this.svg.select('style').text(`@keyframes marching {
         to {
-          stroke-dashoffset: -${14 * factor};
+          stroke-dashoffset: -${14};
         }
       }`);
 
     this.centerArea = centerArea;
 
-
     // Work out where the center of the map is
     if (!this.center || recenter) {
-
       let center;
       if (area) {
         center = this.path.centroid(area);
@@ -855,10 +850,7 @@ class Map extends React.Component {
       .center[0]}, ${-this.center[1]})`;
 
     if (willTransition) {
-      this.everything
-        .transition()
-        .duration(TRANSITION_DURATION)
-        .attr('transform', transform);
+      this.everything.transition().duration(TRANSITION_DURATION).attr('transform', transform);
     } else {
       this.everything.attr('transform', transform);
     }
@@ -866,10 +858,7 @@ class Map extends React.Component {
     this.mapFeatures.attr('d', this.path).style('stroke-width', 1 * factor);
 
     // Render the warning areas
-    this.areaFeatures
-      .selectAll('path')
-      .data(areaData)
-      .attr('d', this.path);
+    this.areaFeatures.selectAll('path').data(areaData).attr('d', this.path);
 
     // Render place dots and names
     // These need to be trashed and re-added because they might all completely change
@@ -938,8 +927,8 @@ class Map extends React.Component {
       .duration(willTransition ? TRANSITION_DURATION : 0)
       .attr('d', this.path)
       .style('stroke-width', d => {
-        if(d.properties.windtype){
-          return .5;
+        if (d.properties.windtype) {
+          return 0.5;
         }
         return 3;
       })
