@@ -115,9 +115,9 @@ export default function Builder() {
                   />
                 </label>
               </div>
-              {selectedCities.length && (
+              {selectedCities.length > 0 && (
                 <>
-                  <p>Click to remove:</p>
+                  <div>Click to remove:</div>
                   <ul>
                     {selectedCities.map(selectedCity => (
                       <li>
@@ -141,6 +141,10 @@ export default function Builder() {
               </datalist>
             </>
           )}
+        </fieldset>
+        <fieldset>
+          <legend>Iframe url</legend>
+          <input readonly value={`https://${location.host}${location.pathname.replace('/builder', '/')}?${hash}`} />
         </fieldset>
       </form>
     </div>

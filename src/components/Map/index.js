@@ -339,8 +339,6 @@ class Map extends React.Component {
       return c;
     });
 
-    citiesWithCoords.forEach(city => console.log(...[city.properties.name, city.x, city.y]));
-
     const citiesInBounds = this.props.cities
       ? citiesWithCoords
       : citiesWithCoords.filter(c => {
