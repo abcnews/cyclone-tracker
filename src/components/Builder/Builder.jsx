@@ -17,6 +17,7 @@ export default function Builder() {
   const [checkDate, setCheckDate] = useState('');
   const [cycloneList, setCycloneList] = useState(null);
   const [selectedCyclone, setSelectedCyclone] = useState(defaultParams.get('cyclone') || null);
+  const thisCyclone = cycloneList?.find(cyclone => selectedCyclone == cyclone.path);
   const [isOverridingLabels, setIsOverridingLabels] = useState(!!defaultParams.get('cities'));
   const [hash, setHash] = useState(window.location.hash.slice(1));
   const [selectedCities, setSelectedCities] = useState(
@@ -33,10 +34,9 @@ export default function Builder() {
     (async () => {
       const res = await fetch('https://www.abc.net.au/dat/news/bom-cyclone-data/cyclones.json');
       const cycloneList = await res.json();
-      const cyclones = cycloneList.cyclones.map(({ name, data, path }) => ({
-        name,
-        data,
-        path: path.replace('tcdata/', '')
+      const cyclones = cycloneList.cyclones.map(({ path, ...rest }) => ({
+        path: path.replace('tcdata/', ''),
+        ...rest
       }));
       setCheckDate(cycloneList.updated);
       if (cyclones.length === 1 && !selectedCyclone) {
@@ -74,7 +74,11 @@ export default function Builder() {
       <form className={styles.containerControls}>
         <fieldset>
           <legend>Cyclone</legend>
-          <p>Data last checked {String(new Date(checkDate))}</p>
+          <small>
+            Data last checked <br />
+            {new Date(checkDate).toString().replace(/\(.*/, '')}
+          </small>
+          <hr />
           <label>
             Cyclone:
             <select value={selectedCyclone} onChange={e => setSelectedCyclone(e.target.value)}>
@@ -85,6 +89,29 @@ export default function Builder() {
               ))}
             </select>
           </label>
+          {thisCyclone && (
+            <>
+              <dl>
+                <dt>Name</dt>
+                <dd>{thisCyclone.name}</dd>
+                <dt>Issued</dt>
+                <dd>
+                  <small>{new Date(thisCyclone.date).toDateString()}</small>
+                  <br />
+                  {new Date(thisCyclone.date).toTimeString().replace(/\(.*/, '')}
+                </dd>
+                <dt>Expiry</dt>
+                <dd>{thisCyclone.expiryHrs} hours</dd>
+                <dt>Next update</dt>
+                <dd>
+                  {new Date(Number(new Date(thisCyclone.date)) + thisCyclone.expiryHrs * 60 * 60 * 1000)
+                    .toTimeString()
+                    .replace(/\(.*/, '')}{' '}
+                  <small>(possibly 1h lag from BOM)</small>
+                </dd>
+              </dl>
+            </>
+          )}
         </fieldset>
         <fieldset>
           <legend>Labels</legend>

@@ -118,4 +118,29 @@
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
   }
+
+  dl {
+    margin: 0;
+  }
+  dl dt {
+    font-weight: bold;
+    float: left;
+    margin-right: 0.5rem;
+    min-width: 3.5rem;
+  }
+  dl dd {
+    border-bottom: 1px solid var(--c-grey, lightgray);
+    margin: 0;
+    padding: 0;
+  }
+  dl dt,
+  dl dd {
+    padding: 0.25rem 0;
+  }
+
+  hr {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--c-grey, lightgray);
+  }
 }
