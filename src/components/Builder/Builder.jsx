@@ -35,7 +35,7 @@ export default function Builder() {
       const res = await fetch('https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/cyclones.json');
       const cycloneList = await res.json();
       const cyclones = cycloneList.cyclones.map(({ path, ...rest }) => ({
-        path: path.replace('tcdata/', ''),
+        path: path.replace('dist/', ''),
         ...rest
       }));
       setCheckDate(cycloneList.updated);
