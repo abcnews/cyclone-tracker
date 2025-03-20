@@ -148,7 +148,13 @@ export default function Builder() {
         </fieldset>
         <fieldset>
           <legend>Iframe url</legend>
-          <input readonly value={`https://${location.host}${location.pathname.replace('/builder', '/')}?${hash}`} />
+          <input
+            readonly
+            value={`https://${location.host}${location.pathname.replace(
+              '/builder',
+              '/'
+            )}?${hash}&abcnewsembedheight=600`}
+          />
         </fieldset>
       </form>
     </div>
