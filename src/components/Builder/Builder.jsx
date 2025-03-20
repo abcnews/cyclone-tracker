@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styles from './Builder.scss';
 import cities from '../Map/cities.topo.json';
 
-export default function Builder({ bucket = '' }) {
+export default function Builder() {
   const citiesArray = useMemo(() =>
     cities.features.reduce((obj, feature) => {
       const name = `${feature.properties.name} - pop ${feature.properties.population} #${feature.properties.id}`;
@@ -35,7 +35,7 @@ export default function Builder({ bucket = '' }) {
       const res = await fetch('https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/cyclones.json');
       const cycloneList = await res.json();
       const cyclones = cycloneList.cyclones.map(({ path, ...rest }) => ({
-        path: bucket + path.replace('dist/', ''),
+        path: path.replace('tcdata/', ''),
         ...rest
       }));
       setCheckDate(cycloneList.updated);
@@ -89,29 +89,6 @@ export default function Builder({ bucket = '' }) {
               ))}
             </select>
           </label>
-          {thisCyclone && (
-            <>
-              <dl>
-                <dt>Name</dt>
-                <dd>{thisCyclone.name}</dd>
-                <dt>Issued</dt>
-                <dd>
-                  <small>{new Date(thisCyclone.date).toDateString()}</small>
-                  <br />
-                  {new Date(thisCyclone.date).toTimeString().replace(/\(.*/, '')}
-                </dd>
-                <dt>Expiry</dt>
-                <dd>{thisCyclone.expiryHrs} hours</dd>
-                <dt>Next update</dt>
-                <dd>
-                  {new Date(Number(new Date(thisCyclone.date)) + thisCyclone.expiryHrs * 60 * 60 * 1000)
-                    .toTimeString()
-                    .replace(/\(.*/, '')}{' '}
-                  <small>(possibly 1h lag from BOM)</small>
-                </dd>
-              </dl>
-            </>
-          )}
         </fieldset>
         <fieldset>
           <legend>Labels</legend>
