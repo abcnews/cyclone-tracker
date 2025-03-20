@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styles from './Builder.scss';
 import cities from '../Map/cities.topo.json';
 
-export default function Builder() {
+export default function Builder({ bucket = '' }) {
   const citiesArray = useMemo(() =>
     cities.features.reduce((obj, feature) => {
       const name = `${feature.properties.name} - pop ${feature.properties.population} #${feature.properties.id}`;
@@ -32,10 +32,10 @@ export default function Builder() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch('https://www.abc.net.au/dat/news/bom-cyclone-data/cyclones.json');
+      const res = await fetch('https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/cyclones.json');
       const cycloneList = await res.json();
       const cyclones = cycloneList.cyclones.map(({ path, ...rest }) => ({
-        path: path.replace('tcdata/', ''),
+        path: bucket + path.replace('dist/', ''),
         ...rest
       }));
       setCheckDate(cycloneList.updated);

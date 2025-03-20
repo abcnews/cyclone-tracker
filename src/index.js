@@ -6,21 +6,6 @@ import GML from './loader.js';
 const PROJECT_NAME = 'cyclone-tracker';
 const root = document.querySelector(`[data-${PROJECT_NAME}-root]`);
 
-const getDistId = strings => {
-  if (typeof strings === 'string') strings = [strings];
-
-  const distId = strings
-    .map(s => {
-      const matches = s.match(/\?cyclone\=([^\.\&]+)/);
-      return matches && matches[1] ? matches[1] : null;
-    })
-    .filter(s => s)[0];
-
-  if (distId && distId.indexOf('.gml') === -1) return distId + '.gml';
-
-  return distId;
-};
-
 async function initBuilder(root) {
   const Builder = await import('./components/Builder/Builder.jsx');
 
@@ -33,7 +18,7 @@ function init() {
   const cyclone = params.get('cyclone');
   const cities = params.get('cities');
   if (root && cyclone) {
-    const url = `//www.abc.net.au/dat/news/bom-cyclone-data/tcdata/${cyclone}`;
+    const url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/${cyclone}`;
     // Load in a cyclone based on the `cyclone` URL parameter
     d3.xml(url, (err, xml) => {
       const data = GML.parse(xml);
