@@ -76,66 +76,67 @@ class Legend extends React.Component {
 
     return (
       <div className={styles.container}>
-      <div className={styles.base}>
-        <div className={styles.title}>{this.props.data.properties.title}</div>
-        <div className={styles.info}>
-          {d.hasWind && (
-            <div className={styles.section}>
-              <h3>Wind areas</h3>
-              {d.hasDamagingWinds && (
-                <div>
-                  <div className={styles.circle} style={{ borderColor: '#b60707' }} />
-                  Damaging
-                </div>
-              )}
+        <div className={styles.base}>
+          <div className={styles.title}>{this.props.data.properties.title}</div>
+          <div className={styles.info}>
+            {d.hasWind && (
+              <div className={styles.section}>
+                <h3>Wind areas</h3>
+                {d.hasDamagingWinds && (
+                  <div>
+                    <div className={styles.circle} style={{ borderColor: '#b60707' }} />
+                    Damaging
+                  </div>
+                )}
 
-              {d.hasDestructiveWinds && (
-                <div>
-                  <div className={styles.circle} style={{ borderColor: '#600000' }} />
-                  Destructive
-                </div>
-              )}
+                {d.hasDestructiveWinds && (
+                  <div>
+                    <div className={styles.circle} style={{ borderColor: '#600000' }} />
+                    Destructive
+                  </div>
+                )}
 
-              {d.hasVeryDestructiveWinds && (
-                <div>
-                  <div className={styles.circle} style={{ borderColor: '#000000' }} />
-                  Very Destructive
-                </div>
-              )}
-            </div>
-          )}
+                {d.hasVeryDestructiveWinds && (
+                  <div>
+                    <div className={styles.circle} style={{ borderColor: '#000000' }} />
+                    Very Destructive
+                  </div>
+                )}
+              </div>
+            )}
 
-          {d.hasWindArea && (
-            <div className={styles.section}>
-              <h3>Wind alert</h3>
-              {d.hasWatchArea && (
-                <div>
-                  <div className={styles.area} style={{ background: '#ffbd55' }} />
-                  Watch area
-                </div>
-              )}
+            {d.hasWindArea && (
+              <div className={styles.section}>
+                <h3>Wind alert</h3>
+                {d.hasWatchArea && (
+                  <div>
+                    <div className={styles.area} style={{ background: '#ffbd55' }} />
+                    Watch area
+                  </div>
+                )}
 
-              {d.hasWarningArea && (
-                <div>
-                  <div className={styles.area} style={{ background: '#ff9255' }} />
-                  Warning area
-                </div>
-              )}
-            </div>
-          )}
+                {d.hasWarningArea && (
+                  <div>
+                    <div className={styles.area} style={{ background: '#ff9255' }} />
+                    Warning area
+                  </div>
+                )}
+              </div>
+            )}
 
-          {d.hasLikelyTrack && (
-            <div className={styles.section}>
-              <h3>Possible range of cyclone centre</h3>
-              <img className={styles.cyclonePath} src={cyclonePath} />
-            </div>
-          )}
+            {d.hasLikelyTrack && (
+              <div className={styles.section}>
+                <h3>Possible range of cyclone centre</h3>
+                <img className={styles.cyclonePath} src={cyclonePath} />
+              </div>
+            )}
+          </div>
+
+          <div className={styles.footer}>
+            Updated {format(data.properties.issueTimeABC, 'D MMM YYYY h:mma')}. Times shown in user's local time.
+            Source: Bureau of Meteorology.
+          </div>
         </div>
-
-        <div className={styles.footer}>
-          Updated {format(data.properties.issueTimeABC, 'D MMM YYYY h:mmA')}. Source: Bureau of Meteorology.
-        </div>
-      </div>
       </div>
     );
   }

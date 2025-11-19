@@ -12,7 +12,7 @@ class List extends React.Component {
     return (
       <div className={styles.base}>
         <div className={styles.heading}>Current Cyclones</div>
-        <div className={styles.meta}>Updated {format(data.updated, 'D MMM YYYY h:mmA')}</div>
+        <div className={styles.meta}>Updated {format(data.updated, 'D MMM YYYY h:mma')}</div>
         {data.cyclones.length === 0 && <div className={styles.none}>There are no active cyclones.</div>}
         {data.cyclones.map(cyclone => (
           <Cyclone key={cyclone.name} baseUrl={baseUrl} data={cyclone} />
