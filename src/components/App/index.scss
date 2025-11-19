@@ -6,9 +6,12 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  border-radius: 0.75rem;
+  // Doesn't work on dark mode yet
+  // border-radius: 0.75rem;
   overflow: hidden;
   border: 1px solid #cccccc;
+  background: white;
+  color: black;
   @media (orientation: landscape) and (min-width: 500px) {
     flex-direction: row;
   }

@@ -738,7 +738,7 @@ class Map extends React.Component {
       .attr('text-anchor', 'middle')
       .attr('x', 100)
       .attr('y', 45)
-      .text(d => format(d.properties.fixtime, 'ddd D MMM, h:mmA').toUpperCase());
+      .text(d => format(d.properties.fixtime, 'ddd D MMM, h:mma').toUpperCase());
     this.balloons
       .append('text')
       .attr('font-size', 16)
@@ -1067,7 +1067,7 @@ class Map extends React.Component {
       .attr('dy', 4 * factor)
       .attr('x', d => d.x + 82 * factor)
       .attr('y', d => d.y)
-      .text(d => 'CURRENT: ' + format(d.properties.fixtime, 'ddd D/M hA').toUpperCase())
+      .text(d => 'CURRENT: ' + format(d.properties.fixtime, 'ddd D/M ha').toUpperCase())
       .style('opacity', d => (d.properties.fixtype === 'Current' ? 1 : 0));
 
     this.balloons
