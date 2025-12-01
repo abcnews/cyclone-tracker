@@ -1,3 +1,6 @@
+const processData = require('./processData');
+const findMidPoints = require('./findMidPoints');
+const getCities = require('./getCities');
 const React = require('react');
 const format = require('date-fns/format');
 const d3 = require('../../d3');
@@ -9,7 +12,6 @@ const styleModule = require('./index.scss');
 const styles = styleModule.default;
 const mapJSON = require('./australia.topo.json');
 const mapData = TopoJSON.feature(mapJSON, mapJSON.objects.australia).features;
-const citiesJSON = require('./cities.topo.json');
 const SERIF_FONT = 'ABCSerif,Book Antiqua,Palatino Linotype,Palatino,serif';
 const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
 const TRANSITION_DURATION = 400;
@@ -18,57 +20,15 @@ const BALLOON_HEIGHT = 95;
 
 const arrowImage = require('./arrow.svg');
 
-const distanceBetweenPoints = (p1, p2) => {
-  const diffX = Math.abs(p2.x - p1.x);
-  const diffY = Math.abs(p2.y - p1.y);
-
-  return Math.round(Math.sqrt(diffX * diffX + diffY * diffY));
-};
-
-const findMidPoints = (path, fixes) => {
-  let points = [];
-
-  path = pathProperties.svgPathProperties(path.node().getAttribute('d'));
-  const totalLength = path.getTotalLength();
-
-  let lastFixAtLength = 0;
-  for (let i = 1; i <= 200; i++) {
-    const length = Math.round((i / 200) * totalLength);
-
-    const p = path.getPointAtLength(length);
-
-    // See if there is a fix point nearby
-    const nearbyFixes = fixes.filter(f => distanceBetweenPoints(f, p) <= 2);
-
-    if (nearbyFixes.length > 0) {
-      const halfwayLength = lastFixAtLength + (length - lastFixAtLength) / 2;
-
-      // Make sure our points aren't too close together
-      if (halfwayLength - lastFixAtLength >= 3) {
-        const p1 = path.getPointAtLength(halfwayLength);
-        const p2 = path.getPointAtLength(halfwayLength + 1);
-        const rotation = (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI;
-        points.push({ x: p1.x, y: p1.y, rotation, lengthSinceMarker: halfwayLength - lastFixAtLength });
-
-        lastFixAtLength = length;
-      }
-    }
-  }
-
-  return points;
-};
-
 const { cycloneImages, stroke, fill, labels } = require('./util');
 
 class Map extends React.Component {
   constructor(props) {
     super(props);
 
-    this.getWrappedText = this.getWrappedText.bind(this);
     this.createBalloon = this.createBalloon.bind(this);
 
     this.key = props.index || Math.floor(Math.random() * 100000).toString();
-    this.processData = this.processData.bind(this);
 
     this.getCities = this.getCities.bind(this);
 
@@ -102,215 +62,30 @@ class Map extends React.Component {
     window.removeEventListener('resize', this.onResize);
   }
 
-  processData(props) {
-    let areaData = [];
-    let cycloneData = [];
-    let weatherData = [];
-    let fixData = [];
-    let area = null;
-    let centerArea = null;
-
-    if (!props.data || !props.data.features)
-      return { data: [], areaData, cycloneData, weatherData, fixData, area, centerArea };
-
-    let likelyTracksCount = 1;
-    let likelyTracks = [];
-
-    const data = props.data.features
-      .map((f, index) => {
-        f.index = index;
-        f.uncertaintyKey = this.key;
-        f.x = this.path.centroid(f)[0];
-        f.y = this.path.centroid(f)[1];
-
-        if (f.properties.areatype === 'Likely Tracks Area') {
-          f.likelyTracksIndex = likelyTracksCount++;
-          likelyTracks.push(f);
-          return null;
-        }
-
-        return f;
-      })
-      .filter(d => d)
-      .concat(likelyTracks.reverse());
-
-    let fallbackCenterArea;
-    let forecastLine;
-    data.forEach(d => {
-      if (d.properties.areatype === 'Watch Area' || d.properties.areatype === 'Warning Area') {
-        areaData.push(d);
-      }
-
-      if (d.properties.symbol === 'Cyclone' && d.properties.fixtype === 'Current') {
-        cycloneData.push(d);
-      }
-
-      if (
-        d.properties.areatype !== 'Watch Area' &&
-        d.properties.areatype !== 'Warning Area' &&
-        (d.properties.windtype || !d.properties.fixtype)
-      ) {
-        weatherData.push(d);
-      }
-
-      if (d.properties.fixtype && !d.properties.windtype) {
-        fixData.push(d);
-      }
-
-      if (d.properties.areatype === 'Likely Tracks Area') {
-        centerArea = d;
-      }
-      if (d.properties.tracktype === 'Observed') {
-        fallbackCenterArea = d;
-      }
-      if (d.properties.tracktype === 'Forecast') {
-        forecastLine = d;
-      }
-    });
-
-    area = (forecastLine ? [forecastLine] : [fallbackCenterArea])
-      .filter(a => a)
-      .reduce(
-        (line, current) => {
-          const coordinates =
-            current.geometry.coordinates[0][0] instanceof Array
-              ? current.geometry.coordinates[0]
-              : current.geometry.coordinates;
-          line.geometry.coordinates = line.geometry.coordinates.concat(coordinates);
-          return line;
-        },
-        {
-          type: 'Feature',
-          geometry: {
-            type: 'LineString',
-            coordinates: []
-          }
-        }
-      );
-
-    // If there are no likely tracks, just use the observed area
-    if (!centerArea) {
-      centerArea = fallbackCenterArea;
-    }
-
-    weatherData = weatherData.sort((a, b) => {
-      if (a.properties.extent && a.properties.extent.indexOf('120')) return 1;
-      return -1;
-    });
-
-    return { data, areaData, cycloneData, weatherData, fixData, area, centerArea };
-  }
-
-  getWrappedText(text, maxWidth) {
-    maxWidth = maxWidth || 150;
-
-    const svg = this.svg;
-    const words = text.split(' ');
-    let lines = [''];
-    let lineIndex = 0;
-    let currentLineLength = 0;
-
-    words.forEach(word => {
-      // work out its bounding box
-      const textElement = svg
-        .append('text')
-        .attr('font-size', 14)
-        .attr('font-family', SANS_SERIF_FONT)
-        .text(word + ' ');
-      const box = textElement.node().getBBox();
-      textElement.remove();
-
-      if (currentLineLength + box.width > maxWidth) {
-        lines.push('');
-        lineIndex++;
-        currentLineLength = 0;
-      }
-
-      lines[lineIndex] += word + ' ';
-      currentLineLength += box.width;
-    });
-
-    return lines;
-  }
-
   createBalloon(text, x, y, parentGroup) {
     if (this.canCreateBalloon !== true) return;
 
     if (this.hintBalloon) this.hintBalloon.remove();
-
     this.popupIndex = null;
     this.center = [x, y];
     this.updateGraph(this.props, { willTransition: true });
-
     if (!parentGroup) parentGroup = this.fixes;
+    const svg = this.svg;
 
-    // create a new group on the given group
-    const balloon = parentGroup.append('g').attr('class', 'popup').attr('fill', 'white');
-
-    const lines = this.getWrappedText(text, 145);
-    const width = 190;
-    const height = 30 + lines.length * 20;
-
-    balloon
-      .append('rect')
-      .attr('fill', 'white')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('rx', 3)
-      .attr('ry', 3)
-      .attr('width', width)
-      .attr('height', height - 5)
-      .attr('stroke', 'rgba(0,0,0,0.3)')
-      .style('strock-width', 1);
-
-    balloon
-      .append('polygon')
-      .attr('points', '0,0 8,10, 16,0')
-      .attr('transform', `translate(90, ${height - 5})`)
-      .attr('stroke', 'rgba(0,0,0,0.3)')
-      .style('strock-width', 1);
-    balloon
-      .append('polygon')
-      .attr('points', '0,0 8,10, 16,0')
-      .attr('transform', `translate(90, ${height - 6})`)
-      .attr('stroke', 'white')
-      .style('strock-width', 1);
-
-    lines.forEach((line, index) => {
-      balloon
-        .append('text')
-        .attr('font-size', 14)
-        .attr('font-family', SANS_SERIF_FONT)
-        .attr('fill', '#222')
-        .attr('text-anchor', 'start')
-        .attr('x', 15)
-        .attr('y', 25 + index * 20)
-        .text(line);
+    const hintBalloon = createBalloon({
+      text,
+      x,
+      y,
+      parentGroup,
+      svg,
+      zoom: this.zoom,
+      onClick: () => {
+        this.hintBalloon.remove();
+        this.hintBalloon = null;
+      }
     });
 
-    balloon
-      .append('text')
-      .attr('font-size', 14)
-      .attr('font-family', SANS_SERIF_FONT)
-      .attr('font-weight', 'bold')
-      .attr('fill', '#999')
-      .attr('text-anchor', 'end')
-      .attr('x', width - 7)
-      .attr('dy', 7)
-      .attr('y', 7)
-      .text('x')
-      .style('cursor', 'pointer');
-
-    balloon.on('click', d => {
-      this.hintBalloon.remove();
-      this.hintBalloon = null;
-    });
-
-    const factor = 1 / this.zoom;
-    balloon.attr('transform', `translate(${x - (width / 2) * factor}, ${y - height * factor - 2}) scale(${factor})`);
-    balloon.props = { x, y, width, height };
-
-    this.hintBalloon = balloon;
+    this.hintBalloon = hintBalloon;
   }
 
   onResize() {
@@ -324,55 +99,13 @@ class Map extends React.Component {
   getCities(props, zoom) {
     if (!this.centerArea) return [];
 
-    const factor = 1 / (zoom || props.zoom || 1);
-    const distance = 40;
-
-    const bounds = this.path.bounds(this.centerArea);
-
-    const targetCities = citiesJSON.features.filter(city => {
-      return this.props.cities.length === 0 || this.props.cities.includes(city.properties.id);
+    const requestedCities = this.props.cities;
+    return getCities({
+      centerArea: this.centerArea,
+      zoom: zoom || props.zoom,
+      requestedCities,
+      path: this.path
     });
-
-    const citiesWithCoords = targetCities.map(c => {
-      c.x = this.path.centroid(c)[0];
-      c.y = this.path.centroid(c)[1];
-      return c;
-    });
-
-    const citiesInBounds = this.props.cities
-      ? citiesWithCoords
-      : citiesWithCoords.filter(c => {
-          if (c.x < bounds[0][0] - distance) return false;
-          if (c.x > bounds[1][0] + distance) return false;
-          if (c.y < bounds[0][1] - distance) return false;
-          if (c.y > bounds[1][1] + distance) return false;
-
-          return true;
-        });
-
-    const filteredCities = citiesInBounds
-      .sort((a, b) => {
-        return a.properties.population > b.properties.population ? -1 : 1;
-      })
-      .slice(0, 100)
-      .map((current, index, array) => {
-        let r = current;
-        // If there is another one that is near here and this one has a lower population then return null
-        array.forEach(other => {
-          if (!other) return;
-
-          const [xClose, yClose] = factor <= 0.2 ? [2.2 * factor, 5 * factor] : [4 * factor, 5 * factor];
-
-          const isClose = Math.abs(current.x - other.x) < xClose || Math.abs(current.y - other.y) < yClose;
-          if (isClose && current.properties.population < other.properties.population) {
-            r = null;
-          }
-        });
-
-        return r;
-      })
-      .filter(c => c);
-    return filteredCities;
   }
 
   /**
@@ -467,7 +200,11 @@ class Map extends React.Component {
       .style('fill', '#ccc')
       .attr('d', this.path);
 
-    const { areaData, cycloneData, weatherData, fixData, centerArea } = this.processData(props);
+    const { areaData, cycloneData, weatherData, fixData, centerArea } = processData({
+      data: props.data,
+      path: this.path,
+      key: this.key
+    });
 
     this.areaFeatures = this.everything.append('g');
     this.areaFeatures.attr('name', 'area-features');
@@ -789,7 +526,11 @@ class Map extends React.Component {
   updateGraph(props, options) {
     const { willTransition, recenter, updateZoom } = options || {};
 
-    const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = this.processData(props);
+    const { data, areaData, cycloneData, weatherData, fixData, area, centerArea } = processData({
+      data: props.data,
+      path: this.path,
+      key: this.key
+    });
 
     this.width = props.width;
     this.height = props.height;
