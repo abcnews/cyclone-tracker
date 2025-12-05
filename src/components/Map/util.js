@@ -1,11 +1,16 @@
-const tinycolor = require('tinycolor2');
+import tinycolor from 'tinycolor2';
+import cyclone1 from './cyclone-1.svg';
+import cyclone2 from './cyclone-2.svg';
+import cyclone3 from './cyclone-3.svg';
+import cyclone4 from './cyclone-4.svg';
+import cyclone5 from './cyclone-5.svg';
 
 const cycloneImages = {
-  '1': require('./cyclone-1.svg'),
-  '2': require('./cyclone-2.svg'),
-  '3': require('./cyclone-3.svg'),
-  '4': require('./cyclone-4.svg'),
-  '5': require('./cyclone-5.svg')
+  1: cyclone1,
+  2: cyclone2,
+  3: cyclone3,
+  4: cyclone4,
+  5: cyclone5
 };
 
 const colourConfig = {
@@ -25,19 +30,19 @@ const colourConfig = {
     'Watch Area': '#ffbd55',
     'Warning Area': '#ff9255',
     Low: '#85D0D9',
-    '1': '#FFCC8B',
-    '2': '#FF8C63',
-    '3': '#FF5D48',
-    '4': '#D60D4C',
-    '5': '#760040'
+    1: '#FFCC8B',
+    2: '#FF8C63',
+    3: '#FF5D48',
+    4: '#D60D4C',
+    5: '#760040'
   },
   labels: {
     Low: '#2A8189',
-    '1': '#AD6200',
-    '2': '#DB3A00',
-    '3': '#E81B00',
-    '4': '#D60D4C',
-    '5': '#760040'
+    1: '#AD6200',
+    2: '#DB3A00',
+    3: '#E81B00',
+    4: '#D60D4C',
+    5: '#760040'
   }
 };
 
@@ -69,9 +74,7 @@ function fill(d) {
     let colour = d.properties.symbol === 'Low' ? colourConfig.fill['Low'] : colourConfig.fill[d.properties.category];
     if (d.properties.fixtype === 'Observed') {
       // Fade out previous observations
-      colour = tinycolor(colour)
-        .desaturate(30)
-        .toString();
+      colour = tinycolor(colour).desaturate(30).toString();
     }
     c = colour;
   } else if (d.properties.fixtype === 'Current' && d.properties.windtype) {
@@ -97,4 +100,4 @@ function labels(d) {
   return c;
 }
 
-module.exports = { cycloneImages, fill, stroke, labels };
+export { cycloneImages, fill, stroke, labels };

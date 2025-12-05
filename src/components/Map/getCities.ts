@@ -1,5 +1,6 @@
-const citiesJSON = require('./cities.topo.json');
-module.exports = function getCities({ centerArea, zoom, requestedCities = [], path }) {
+import citiesJSON from './cities.topo.json';
+
+export default function getCities({ centerArea, zoom, requestedCities = [], path }) {
   const bounds = path.bounds(centerArea);
   const factor = 1 / (zoom || 1);
   const distance = 40;
@@ -48,4 +49,4 @@ module.exports = function getCities({ centerArea, zoom, requestedCities = [], pa
     })
     .filter(c => c);
   return filteredCities;
-};
+}

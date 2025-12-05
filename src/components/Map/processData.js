@@ -1,4 +1,4 @@
-module.exports = function processData({ data, path, key }) {
+export default function processData({ data, path, key }) {
   let areaData = [];
   let cycloneData = [];
   let weatherData = [];
@@ -94,4 +94,4 @@ module.exports = function processData({ data, path, key }) {
   });
 
   return { data, areaData, cycloneData, weatherData, fixData, area, centerArea };
-};
+}

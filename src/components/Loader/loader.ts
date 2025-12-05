@@ -1,4 +1,4 @@
-const flattenDeep = require('lodash/flattenDeep');
+import flattenDeep from 'lodash-es/flattenDeep';
 
 const TROPICAL_LOW = 'Tropical Low';
 
@@ -215,4 +215,6 @@ class GML {
   }
 }
 
-module.exports = new GML();
+const gmlClass = new GML();
+
+export default gmlClass;

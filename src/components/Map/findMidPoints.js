@@ -1,14 +1,18 @@
-const pathProperties = require('svg-path-properties');
+import { svgPathProperties } from 'svg-path-properties';
+
 const distanceBetweenPoints = (p1, p2) => {
   const diffX = Math.abs(p2.x - p1.x);
   const diffY = Math.abs(p2.y - p1.y);
 
   return Math.round(Math.sqrt(diffX * diffX + diffY * diffY));
 };
-const findMidPoints = (path, fixes) => {
+
+export default function findMidPoints(path, fixes) {
   let points = [];
 
-  path = pathProperties.svgPathProperties(path.node().getAttribute('d'));
+  console.log('path', path.node(), path);
+
+  path = svgPathProperties(path.node().getAttribute('d'));
   const totalLength = path.getTotalLength();
 
   let lastFixAtLength = 0;
@@ -36,6 +40,4 @@ const findMidPoints = (path, fixes) => {
   }
 
   return points;
-};
-
-module.exports = findMidPoints;
+}

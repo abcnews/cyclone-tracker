@@ -1,3 +1,5 @@
+const SANS_SERIF_FONT = 'ABCSans,Helvetica,Arial,sans-serif';
+
 function getWrappedText(text, maxWidth, svg) {
   maxWidth = maxWidth || 150;
 
@@ -29,7 +31,7 @@ function getWrappedText(text, maxWidth, svg) {
   return lines;
 }
 
-module.exports = function createBalloon({ text, x, y, parentGroup, svg, onClick, zoom }) {
+export default function createBalloon({ text, x, y, parentGroup, svg, onClick, zoom }) {
   // create a new group on the given group
   const balloon = parentGroup.append('g').attr('class', 'popup').attr('fill', 'white');
 
@@ -92,4 +94,6 @@ module.exports = function createBalloon({ text, x, y, parentGroup, svg, onClick,
   const factor = 1 / zoom;
   balloon.attr('transform', `translate(${x - (width / 2) * factor}, ${y - height * factor - 2}) scale(${factor})`);
   balloon.props = { x, y, width, height };
-};
+
+  return balloon;
+}
