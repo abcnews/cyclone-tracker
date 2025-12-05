@@ -1,4 +1,5 @@
 import flattenDeep from 'lodash-es/flattenDeep';
+import type { CycloneGeoJson } from './types';
 
 const TROPICAL_LOW = 'Tropical Low';
 
@@ -211,7 +212,7 @@ class GML {
 
     geo.properties.title = title;
 
-    return geo;
+    return geo as CycloneGeoJson;
   }
 }
 
