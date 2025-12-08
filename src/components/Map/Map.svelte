@@ -280,7 +280,6 @@
       .attr('xlink:href', d => cycloneImages[d.properties.category]);
 
     // Get all of the midpoints along the lines of the path
-    console.log('features', features.select('*'));
     const trackLines = findMidPoints(features.select('path.track'), fixData);
 
     arrows = everythingGroup.append('g');
