@@ -10,8 +10,6 @@ const distanceBetweenPoints = (p1, p2) => {
 export default function findMidPoints(path, fixes) {
   let points = [];
 
-  console.log('path', path.node(), path);
-
   path = svgPathProperties(path.node().getAttribute('d'));
   const totalLength = path.getTotalLength();
 

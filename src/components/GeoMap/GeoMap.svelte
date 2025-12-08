@@ -6,43 +6,64 @@
   import colourConfig from './colours';
   import { calculateGeoJSONBounds } from './mapUtils';
   import uncertaintyPatternUrl from './uncertainty-pattern.png';
+  import cycloneCurrentLabel from './cycloneCurrentLabel';
 
   let { data }: { data: CycloneGeoJson } = $props();
+  let isLoaded = $state(false);
+  let clientWidth = $state(0);
+  let clientHeight = $state(0);
 </script>
 
-<MapLibre
-  onLoad={({ rootNode, maplibregl }) => {
-    const style = 'https://www.abc.net.au/res/sites/news-projects/map-vector-style-bright/style.json';
-    const tiles = 'https://www.abc.net.au/res/sites/news-projects/map-vector-tiles-australia/australia.json';
+<div class="geo-map" style:opacity={isLoaded ? 1 : 0} bind:clientWidth bind:clientHeight>
+  <MapLibre
+    onLoad={async ({ rootNode, maplibregl }) => {
+      const style = 'https://www.abc.net.au/res/sites/news-projects/map-vector-style-bright/style.json';
+      const tiles = 'https://www.abc.net.au/res/sites/news-projects/map-vector-tiles-australia/australia.json';
+      const bounds = calculateGeoJSONBounds(
+        {
+          ...data,
+          features: data.features.filter(feature => {
+            // If archived, show the whole path.
+            if (data.properties.isArchived) {
+              return true;
+            }
 
-    const bounds = calculateGeoJSONBounds(data, new maplibregl.LngLatBounds());
+            // If this is "Observed", it has happened in the past.
+            // While the cyclone is active, we only want to show current & future
+            const isObserved = feature.properties.fixtype === 'Observed' || feature.properties.tracktype === 'Observed';
+            console.log({ isObserved });
+            return !isObserved;
+          })
+        },
+        new maplibregl.LngLatBounds()
+      );
 
-    const map = new maplibregl.Map({
-      zoom: 2,
-      minZoom: 2,
-      maxZoom: 12,
-      attributionControl: false,
-      dragRotate: false,
-      doubleClickZoom: false,
-      style: style,
-      container: rootNode,
-      interactive: true
-    });
-
-    if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, {
-        padding: 50,
-        maxZoom: 10
+      const map = new maplibregl.Map({
+        zoom: 2,
+        minZoom: 2,
+        maxZoom: 12,
+        attributionControl: false,
+        dragRotate: false,
+        doubleClickZoom: false,
+        style: style,
+        container: rootNode,
+        interactive: true
       });
-    }
 
-    map.on('style.load', () => {
-      map.setProjection({
-        type: 'globe' // Set projection to globe
-      });
-    });
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, {
+          padding: 50,
+          maxZoom: 10
+        });
+      }
 
-    map.on('load', async () => {
+      await Promise.all([new Promise(resolve => map.on('load', resolve))]);
+      isLoaded = true;
+
+      // map.setProjection({
+      //   type: 'globe' // Set projection to globe
+      // });
+
       // Add GeoJSON source if data is available
       if (!data) {
         return;
@@ -60,7 +81,7 @@
         data: data
       });
 
-      // Add uncertainty pattern for likely tracks area
+      // UNCERTAINTY PATTERN
       map.addLayer({
         id: 'geojson-uncertainty',
         type: 'fill',
@@ -84,7 +105,7 @@
         }
       });
 
-      // Add current wind fills
+      // CURRENT WIND FILLS
       map.addLayer({
         id: 'geojson-wind',
         type: 'fill',
@@ -106,7 +127,7 @@
         }
       });
 
-      // Add the watch & warning areas over land
+      // WATCH & WARNING AREAS
       map.addLayer({
         id: 'geojson-watch-warning-areas',
         type: 'fill',
@@ -140,6 +161,7 @@
           'line-join': 'round',
           'line-cap': 'round'
         },
+        filter: ['any', ['has', 'tracktype'], ['has', 'windtype']],
         paint: {
           'line-color': [
             'case',
@@ -157,7 +179,7 @@
             colourConfig.stroke.Forecast,
 
             // Default color
-            colourConfig.stroke.fix // Default to fix color
+            'transparent' // Default to fix color
           ],
           'line-width': [
             'case',
@@ -186,7 +208,7 @@
           return;
         }
         const { fixtype, symbol, category } = feature.properties;
-        if (!(fixtype && symbol)) {
+        if (!symbol) {
           return;
         }
 
@@ -203,7 +225,7 @@
         }
       });
 
-      // Add cyclone numbers
+      // OTHER CYCLONE POINTS
       data.features.forEach(feature => {
         if (feature.geometry.type !== 'Point') {
           return;
@@ -218,11 +240,44 @@
           symbol,
           category
         });
-        new maplibregl.Marker({ element: el }).setLngLat(feature.geometry.coordinates).addTo(map);
+        new maplibregl.Marker({
+          element: el,
+          className: feature.properties.fixtype === 'Current' ? 'geo-map__current-point' : ''
+        })
+          .setLngLat(feature.geometry.coordinates)
+          .addTo(map);
       });
-    });
-  }}
-/>
+
+      // CURRENT CYCLONE POINT
+      const currentFix = data.features.find(
+        feature => feature.geometry.type === 'Point' && feature.properties.fixtype === 'Current'
+      );
+      let currentFixMarker;
+      let previousIsRight;
+      map.on('moveend', async () => {
+        if (currentFix?.geometry.type === 'Point') {
+          const currentFixLabelEl = cycloneCurrentLabel({ fixtime: currentFix?.properties.fixtime });
+          const coord = currentFix.geometry.coordinates;
+          const projectedPos = map.project(coord);
+          const isRight = projectedPos.x > clientWidth / 2;
+          if(isRight === previousIsRight){
+            return;
+          }
+          previousIsRight = isRight;
+          if (currentFixMarker) {
+            currentFixMarker.remove();
+          }
+          currentFixMarker = new maplibregl.Marker({
+            element: currentFixLabelEl,
+            anchor: isRight ? 'right' : 'left'
+          })
+            .setLngLat(coord)
+            .addTo(map);
+        }
+      });
+    }}
+  />
+</div>
 
 <style lang="scss">
   :global {
@@ -236,6 +291,43 @@
           opacity: 0.8;
         }
       }
+    }
+
+    .geo-map__current-point {
+      z-index: 100;
+    }
+
+    .geomap__current-label {
+      background: rgba(255, 255, 255, 0.9);
+      color: black;
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: bold;
+      font-family: ABCSans, Helvetica, Arial, sans-serif;
+      border: 1px solid #999;
+      padding: 0 5px 0 18px;
+      border-radius: 5px;
+      margin-top: -2px;
+      z-index: 95;
+      animation:fadeIn 0.25s;
+      &.maplibregl-marker-anchor-right {
+        padding: 0 18px 0 5px;
+      }
+    }
+  }
+
+  .geo-map {
+    transition: opacity 0.2s;
+    height: 100%;
+    width: 100%;
+  }
+
+  @keyframes fadeIn{
+    from{
+      opacity:0;
+    }
+    to{
+      opacity:1;
     }
   }
 </style>
