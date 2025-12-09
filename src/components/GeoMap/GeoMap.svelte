@@ -56,6 +56,20 @@
           }
           return layer;
         });
+
+      const map = new maplibregl.Map({
+        zoom: 2,
+        minZoom: 2,
+        maxZoom: 12,
+        attributionControl: false,
+        dragRotate: false,
+        doubleClickZoom: false,
+        style: style,
+        container: rootNode,
+        interactive: true
+      });
+
+      // Zoom to cyclone
       const bounds = calculateGeoJSONBounds(
         {
           ...data,
@@ -73,19 +87,6 @@
         },
         new maplibregl.LngLatBounds()
       );
-
-      const map = new maplibregl.Map({
-        zoom: 2,
-        minZoom: 2,
-        maxZoom: 12,
-        attributionControl: false,
-        dragRotate: false,
-        doubleClickZoom: false,
-        style: style,
-        container: rootNode,
-        interactive: true
-      });
-
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, {
           padding: 50,

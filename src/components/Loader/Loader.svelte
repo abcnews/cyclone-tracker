@@ -7,7 +7,6 @@
   const params = new URLSearchParams(location.search);
   let cyclone = $state(params.get('cyclone'));
   let sample = $state(params.get('sample'));
-  let cities = $state(params.get('cities')?.split('x').map(Number) || []);
   let cycloneData = $state();
 
   onMount(() => {
@@ -18,8 +17,6 @@
     if (sample === 'true') {
       url = '/examples/' + encodeURIComponent(cyclone);
     }
-    // const url = `/examples/AU202425_29U-2025-04-11-11-04.gml`;
-    // Load in a cyclone based on the `cyclone` URL parameter
     xml(url, (err, xml) => {
       cycloneData = GML.parse(xml);
     });
@@ -30,11 +27,11 @@
   <div class="info">No cyclone specified</div>
 {/if}
 {#if cyclone && !cycloneData}
-  <div class="info loader">Loading</div>
+  <div class="info loader">Loading…</div>
 {/if}
 
 {#if cycloneData}
-  <App {cities} data={cycloneData} />
+  <App data={cycloneData} />
 {/if}
 
 <style lang="scss">
@@ -44,6 +41,17 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
+      background: #fff;
+      color: black;
+      font-family: ABCSans, Helvetica, Arial, sans-serif;
     }
+  }
+
+  .info.loader {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 </style>

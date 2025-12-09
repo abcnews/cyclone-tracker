@@ -148,6 +148,8 @@
   .container {
     container-type: inline-size;
     min-width: 200px;
+    z-index: 400;
+    box-shadow: -2px 0 0 rgba(0, 0, 0, 0.05);
   }
 
   .base {

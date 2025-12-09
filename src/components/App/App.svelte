@@ -10,12 +10,7 @@
     index?: any;
   }
 
-  let {
-    cities = [],
-    data = null,
-    embedded = false,
-    index = Math.floor(Math.random() * 100000).toString()
-  }: Props = $props();
+  let { data = null, embedded = false, index = Math.floor(Math.random() * 100000).toString() }: Props = $props();
 
   // Ref for resize observer
   let base = $state();
