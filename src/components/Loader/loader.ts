@@ -104,16 +104,18 @@ class GML {
     window.NODES = window.NODES || [];
     window.NODES.push(node);
 
-    return {
+    const coordinates = this.findCoordinatesNodes(node).map(el => {
+      return this.parseCoordinates(el.textContent);
+    });
+
+    return coordinates.map(coordinate => ({
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: this.findCoordinatesNodes(node).map(el => {
-          return this.parseCoordinates(el.textContent);
-        })
+        coordinates: [coordinate]
       },
       properties: this.getNodeProperties(node)
-    };
+    }));
   }
 
   /**
@@ -149,7 +151,7 @@ class GML {
 
     ['tcWarningArea', 'tcWatchArea', 'tcForecastArea', 'tcWindArea'].forEach(tag => {
       [].slice.call(xml.querySelectorAll(tag)).forEach(node => {
-        geo.features.push(this.createPolygon(node));
+        geo.features.push(...this.createPolygon(node));
       });
     });
 
