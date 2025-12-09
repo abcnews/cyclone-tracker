@@ -37,3 +37,12 @@ export function calculateGeoJSONBounds(data: CycloneGeoJson, bounds): maplibregl
 
   return bounds;
 }
+
+/**
+ * Sanitise any content before injecting it into a template string.
+ */
+export function safeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}

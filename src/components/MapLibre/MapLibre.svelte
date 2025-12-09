@@ -5,9 +5,15 @@
   const MAPLIBRE_URL = 'https://www.abc.net.au/res/sites/news-projects/maplibre/v5.3.0/maplibre-gl.js';
   const MAPLIBRE_CSS_URL = 'https://www.abc.net.au/res/sites/news-projects/maplibre/v5.3.0/maplibre-gl.css';
   const {
-    onLoad
+    onLoad,
+    style
   }: {
-    onLoad: ({}: { rootNode: HTMLDivElement; maplibregl: typeof window.maplibregl }) => void | Promise<void>;
+    onLoad: ({}: {
+      rootNode: HTMLDivElement;
+      maplibregl: typeof window.maplibregl;
+      style: any;
+    }) => void | Promise<void>;
+    style: string;
   } = $props();
   let rootNode = $state<HTMLDivElement>();
 
@@ -49,8 +55,12 @@
     if (!rootNode) {
       throw new Error('Root missing');
     }
-    await Promise.all([importModule(MAPLIBRE_URL), loadCss(MAPLIBRE_CSS_URL)]);
-    onLoad({ rootNode, maplibregl: window.maplibregl });
+    const [loadedStyle] = await Promise.all([
+      style && fetch(style).then(res => res.json()),
+      importModule(MAPLIBRE_URL),
+      loadCss(MAPLIBRE_CSS_URL)
+    ]);
+    onLoad({ rootNode, maplibregl: window.maplibregl, style: loadedStyle });
   });
 </script>
 

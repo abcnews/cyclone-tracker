@@ -73,7 +73,6 @@
     };
   }
 
-  // Reactive statement to process data when it changes
   $: legendData = processData(data?.features);
 </script>
 

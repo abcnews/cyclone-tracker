@@ -6,6 +6,7 @@
 
   const params = new URLSearchParams(location.search);
   let cyclone = $state(params.get('cyclone'));
+  let sample = $state(params.get('sample'));
   let cities = $state(params.get('cities')?.split('x').map(Number) || []);
   let cycloneData = $state();
 
@@ -13,8 +14,11 @@
     if (!cyclone) {
       return;
     }
-    // const url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/${cyclone}`;
-    const url = `/examples/AU202425_29U-2025-04-11-11-04.gml`;
+    let url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/${encodeURIComponent(cyclone)}`;
+    if (sample === 'true') {
+      url = '/examples/' + encodeURIComponent(cyclone);
+    }
+    // const url = `/examples/AU202425_29U-2025-04-11-11-04.gml`;
     // Load in a cyclone based on the `cyclone` URL parameter
     xml(url, (err, xml) => {
       cycloneData = GML.parse(xml);

@@ -8,7 +8,7 @@ export type MarineType = 'Gale' | 'Storm' | 'Hurricane';
 export type SymbolType = 'Low' | 'Cyclone';
 export type CategoryType = 0 | '1' | '2' | '3' | '4';
 // Added strict types for areatype and extent
-export type AreaType = 'Likely Tracks Area';
+export type AreaType = 'Likely Tracks Area' | 'Watch Area' | 'Warning Area';
 export type ExtentType = 'Up to 72 hours' | 'Up to 120 hours';
 
 // Basic Coordinate types

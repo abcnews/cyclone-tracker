@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Map from '../Map/Map.svelte';
   import Legend from '../Legend/Legend.svelte';
   import GeoMap from '../GeoMap/GeoMap.svelte';
 
@@ -20,7 +19,6 @@
 
   // Ref for resize observer
   let base = $state();
-  let resizeObserver;
 
   // Computed class names
   let containerClasses = $derived(['base', embedded ? 'base--embedded' : ''].filter(Boolean).join(' '));
@@ -29,9 +27,6 @@
 <div class={containerClasses} bind:this={base}>
   <div class="base__map">
     <GeoMap {data} />
-  </div>
-  <div class="base__map">
-    <Map {cities} {data} {embedded} zoom={1} onAutoZoom={() => {}} {index} center="current" width={640} height={480} />
   </div>
 
   <Legend {data} />
