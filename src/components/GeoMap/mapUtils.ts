@@ -1,39 +1,24 @@
+import * as turf from '@turf/turf';
 import type { CycloneGeoJson } from '../Loader/types';
 
 /**
- * Calculate bounds from GeoJSON features
- * @param data - GeoJSON data
- * @returns LngLatBounds object
+ * Calculate bounds from GeoJSON features using Turf.js
  */
-export function calculateGeoJSONBounds(data: CycloneGeoJson, bounds): maplibregl.LngLatBounds {
+export function calculateGeoJSONBounds(data: CycloneGeoJson, bounds: maplibregl.LngLatBounds): maplibregl.LngLatBounds {
   if (!data || !data.features || data.features.length === 0) {
     return bounds;
   }
 
-  data.features.forEach((feature: any) => {
-    if (feature.geometry.type === 'Point') {
-      const [lng, lat] = feature.geometry.coordinates;
-      bounds.extend([lng, lat]);
-    } else if (feature.geometry.type === 'LineString') {
-      feature.geometry.coordinates.forEach((coord: any) => {
-        bounds.extend(coord);
-      });
-    } else if (feature.geometry.type === 'Polygon') {
-      feature.geometry.coordinates.forEach((ring: any) => {
-        ring.forEach((coord: any) => {
-          bounds.extend(coord);
-        });
-      });
-    } else if (feature.geometry.type === 'MultiPolygon') {
-      feature.geometry.coordinates.forEach((polygon: any) => {
-        polygon.forEach((ring: any) => {
-          ring.forEach((coord: any) => {
-            bounds.extend(coord);
-          });
-        });
-      });
-    }
-  });
+  const bbox = turf.bbox(data);
+  const poly = turf.bboxPolygon(bbox);
+
+  const bufferAmount = data.properties?.isArchived ? 50 : 20;
+  const bufferedBounds = turf.buffer(poly, bufferAmount, { units: 'kilometers' });
+
+  const bufferedBbox = bufferedBounds ? turf.bbox(bufferedBounds) : bbox;
+
+  bounds.extend([bufferedBbox[0], bufferedBbox[1]]);
+  bounds.extend([bufferedBbox[2], bufferedBbox[3]]);
 
   return bounds;
 }

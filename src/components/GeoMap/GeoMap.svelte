@@ -14,6 +14,7 @@
   import type { Popup } from '../MapLibre/maplibre-gl';
   import GeoMapAltText from './GeoMapAltText/GeoMapAltText.svelte';
   import mapStyle from './mapStyle/mapStyle';
+  import { bboxPolygon, buffer } from '@turf/turf';
 
   let { data }: { data: CycloneGeoJson } = $props();
   let isLoaded = $state(false);
@@ -67,8 +68,7 @@
               return true;
             }
 
-            // If this is "Observed", it has happened in the past.
-            // While the cyclone is active, we only want to show current & future
+            // Only  show current & future features while the cyclone is active
             const isObserved = feature.properties.fixtype === 'Observed' || feature.properties.tracktype === 'Observed';
             return !isObserved;
           })
@@ -77,7 +77,6 @@
       );
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, {
-          padding: 50,
           maxZoom: 10
         });
       }

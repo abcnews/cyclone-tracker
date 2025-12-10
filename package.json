@@ -34,6 +34,7 @@
     "@abcnews/components-builder": "^0.0.12",
     "@abcnews/env-utils": "^5.0.2",
     "@abcnews/mount-utils": "^3.0.0",
+    "@turf/turf": "^7.3.1",
     "d3-geo": "^3.1.1",
     "d3-request": "^1.0.6",
     "d3-selection": "^3.0.0",
