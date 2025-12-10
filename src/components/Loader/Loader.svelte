@@ -8,6 +8,7 @@
   let cyclone = $state(params.get('cyclone'));
   let sample = $state(params.get('sample'));
   let cycloneData = $state();
+  let error = $state('');
 
   onMount(() => {
     if (!cyclone) {
@@ -15,9 +16,14 @@
     }
     let url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/${encodeURIComponent(cyclone)}`;
     if (sample === 'true') {
-      url = '/examples/' + encodeURIComponent(cyclone);
+      url = 'examples/' + encodeURIComponent(cyclone);
     }
     xml(url, (err, xml) => {
+      if (err) {
+        error = 'Could not load cyclone data';
+        console.error(err);
+        return;
+      }
       cycloneData = GML.parse(xml);
     });
   });
@@ -40,10 +46,14 @@
 </script>
 
 {#if !cyclone}
-  <div class="info">No cyclone specified</div>
+  <div class="info loader"><div class="pill">No cyclone specified</div></div>
 {/if}
 {#if cyclone && !cycloneData}
-  <div class="info loader"><div class="pill">Loading…</div></div>
+  <div class="info loader">
+    <div class="pill">
+      {error || 'Loading…'}
+    </div>
+  </div>
 {/if}
 
 {#if cycloneData}
