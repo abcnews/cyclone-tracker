@@ -3,11 +3,12 @@
   import GML from './loader';
   import App from '../App/App.svelte';
   import { xml } from 'd3-request';
+  import type { CycloneGeoJson } from './types';
 
   const params = new URLSearchParams(location.search);
   let cyclone = $state(params.get('cyclone'));
   let sample = $state(params.get('sample'));
-  let cycloneData = $state();
+  let cycloneData = $state<CycloneGeoJson>();
   let error = $state('');
 
   onMount(() => {
@@ -25,6 +26,7 @@
         return;
       }
       cycloneData = GML.parse(xml);
+      document.title = `${cycloneData.properties.distName} map`;
     });
   });
 
