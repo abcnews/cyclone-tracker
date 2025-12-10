@@ -38,6 +38,7 @@ export default function mapStyle() {
         layer.layout = {
           ...layer.layout,
           'text-font': ['ABC Sans Regular'],
+          // @ts-ignore - text-letter-spacing is valid
           'text-letter-spacing': 0.36,
           'text-transform': 'uppercase'
         };
@@ -47,6 +48,7 @@ export default function mapStyle() {
       // ROAD STYLES
       if (layer.id.includes('highway')) {
         if (layer.id.includes('casing')) {
+          //@ts-ignore - conditional line colour is valid
           layer.paint['line-color'] = {
             stops: [
               [12, '#BDBDBD'],

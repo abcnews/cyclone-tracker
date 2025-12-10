@@ -32,7 +32,7 @@
   "dependencies": {
     "@abcnews/alternating-case-to-object": "^3.2.0",
     "@abcnews/components-builder": "^0.0.12",
-    "@abcnews/env-utils": "^5.0.1",
+    "@abcnews/env-utils": "^5.0.2",
     "@abcnews/mount-utils": "^3.0.0",
     "d3-geo": "^3.1.1",
     "d3-request": "^1.0.6",

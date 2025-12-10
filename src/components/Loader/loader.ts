@@ -1,3 +1,5 @@
+// @ts-nocheck
+// This is a legacy file and it needs to be largely rewritten for TypeScript
 import flattenDeep from 'lodash-es/flattenDeep';
 import type { CycloneGeoJson } from './types';
 
@@ -6,12 +8,10 @@ const TROPICAL_LOW = 'Tropical Low';
 class GML {
   /**
    * Find the first child of node that has 'coordinates' in its name
-   * @param {XMLElement} node
-   * @return {array<XMLElement>}
+   * @param {Element} node
+   * @return {array<Element>}
    */
-  findCoordinatesNodes(node, depth) {
-    depth = typeof depth === 'undefined' ? 0 : depth;
-
+  findCoordinatesNodes(node, depth = 0) {
     if (!node) return [];
 
     if (node.nodeName.toLowerCase().indexOf('coordinates') > -1) return [node];
@@ -63,15 +63,15 @@ class GML {
 
   /**
    * Get a hash child elements/values for a given  node
-   * @param {XMLElement} node
+   * @param {Element} node
    * @return {object}
    */
-  getNodeProperties(node) {
+  getNodeProperties(node: Element) {
     let properties = {};
 
     if (!node || !node.childNodes || node.childNodes.length === 0) return properties;
 
-    [].slice.call(node.childNodes).forEach(child => {
+    Array.from(node.childNodes).forEach(child => {
       if (child.nodeName === 'geometry') return;
       properties[child.nodeName.toLowerCase()] = child.textContent;
     });
@@ -81,10 +81,10 @@ class GML {
 
   /**
    * Create a line object
-   * @param {XMLElement} node
+   * @param {Element} node
    * @returns {object}
    */
-  createLine(node) {
+  createLine(node: Element) {
     return {
       type: 'Feature',
       geometry: {
@@ -97,13 +97,10 @@ class GML {
 
   /**
    * Create a polygon
-   * @param {XMLElement} node
+   * @param {Element} node
    * @returns {object}
    */
-  createPolygon(node) {
-    window.NODES = window.NODES || [];
-    window.NODES.push(node);
-
+  createPolygon(node: Element) {
     const coordinates = this.findCoordinatesNodes(node).map(el => {
       return this.parseCoordinates(el.textContent);
     });
@@ -123,8 +120,6 @@ class GML {
    * @param {XMLDocument} xml
    */
   parse(xml) {
-    window.XML = xml;
-
     // Basic GeoJSON structure
     let geo = {
       type: 'FeatureCollection',
@@ -142,7 +137,7 @@ class GML {
 
     geo.properties.isArchived = xml.querySelectorAll('geometry').length === 0;
     if (geo.properties.isArchived) {
-      const times = [].slice.call(xml.querySelectorAll('tcFix'));
+      const times = Array.from(xml.querySelectorAll('tcFix'));
       geo.properties.historicalRange = [
         times[0].querySelector('fixTime').textContent,
         times[times.length - 1].querySelector('fixTime').textContent
@@ -150,12 +145,12 @@ class GML {
     }
 
     ['tcWarningArea', 'tcWatchArea', 'tcForecastArea', 'tcWindArea'].forEach(tag => {
-      [].slice.call(xml.querySelectorAll(tag)).forEach(node => {
+      Array.from(xml.querySelectorAll(tag)).forEach(node => {
         geo.features.push(...this.createPolygon(node));
       });
     });
 
-    [].slice.call(xml.querySelectorAll('tcTrack')).forEach(node => {
+    Array.from(xml.querySelectorAll('tcTrack')).forEach(node => {
       geo.features.push(this.createLine(node));
     });
 
@@ -167,7 +162,7 @@ class GML {
       bottom: -Infinity,
       right: -Infinity
     };
-    [].slice.call(xml.querySelectorAll('tcFix')).forEach(node => {
+    Array.from(xml.querySelectorAll('tcFix')).forEach(node => {
       const coordinates = this.parseCoordinate(node.querySelector('gml\\:coordinates, coordinates').textContent);
 
       box.top = Math.min(coordinates[1], box.top);
