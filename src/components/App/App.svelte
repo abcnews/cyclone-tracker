@@ -29,18 +29,11 @@
 
 <style lang="scss">
   :global {
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    * {
-      box-sizing: border-box;
-    }
   }
   .base {
     position: relative;
     overflow: hidden;
+    border-radius: 1rem;
 
     width: 100%;
     height: 100vh;

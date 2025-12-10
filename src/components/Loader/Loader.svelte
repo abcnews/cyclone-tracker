@@ -21,13 +21,29 @@
       cycloneData = GML.parse(xml);
     });
   });
+
+  onMount(() => {
+    try {
+      const frame = Array.from(window.parent.document.querySelectorAll('iframe'))?.find(
+        iframe => (iframe.src = String(window.location))
+      );
+      if (frame) {
+        frame.style.colorScheme = 'light';
+      }
+    } catch (e) {
+      console.warn(
+        'Cyclone tracker: Could not set dark mode on iframe. This only works in prod/same domain.',
+        e.message
+      );
+    }
+  });
 </script>
 
 {#if !cyclone}
   <div class="info">No cyclone specified</div>
 {/if}
 {#if cyclone && !cycloneData}
-  <div class="info loader">Loading…</div>
+  <div class="info loader"><div class="pill">Loading…</div></div>
 {/if}
 
 {#if cycloneData}
@@ -41,9 +57,12 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #fff;
+      background: transparent;
       color: black;
       font-family: ABCSans, Helvetica, Arial, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
     }
   }
 
@@ -53,5 +72,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .pill {
+    padding: 20px 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+    color: black;
   }
 </style>

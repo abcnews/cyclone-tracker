@@ -12,6 +12,8 @@
   import cycloneCurrentLabel from './htmlComponents/cycloneCurrentLabel';
   import { get, writable } from 'svelte/store';
   import type { Popup } from '../MapLibre/maplibre-gl';
+  import GeoMapAltText from './GeoMapAltText/GeoMapAltText.svelte';
+  import mapStyle from './mapStyle/mapStyle';
 
   let { data }: { data: CycloneGeoJson } = $props();
   let isLoaded = $state(false);
@@ -21,52 +23,38 @@
   let currentPopup = writable<Popup | undefined>();
 </script>
 
-<div class="geo-map" style:opacity={isLoaded ? 1 : 0} bind:clientWidth bind:clientHeight>
+<div class="sr-only" id="geomap-alt">
+  <GeoMapAltText {data} />
+</div>
+
+<div
+  class="geo-map"
+  style:opacity={isLoaded ? 1 : 0}
+  bind:clientWidth
+  bind:clientHeight
+  role="img"
+  aria-describedby="geomap-alt"
+>
   <MapLibre
-    style="https://www.abc.net.au/res/sites/news-projects/map-vector-style-bright/style.json"
-    onLoad={async ({ rootNode, maplibregl, style }) => {
+    onLoad={async ({ rootNode, maplibregl }) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log({ data: $state.snapshot(data) });
-        console.log({ style });
+        console.log({
+          data: $state.snapshot(data)
+        });
       }
 
-      // REWRITE STYLE TO MATCH DATAWRAPPER
-      const LAND = '#f2f3f0';
-      const OCEAN = '#c4d8dd';
-      const DARK_OCEAN = '#b4c8cd';
-      style.layers = style.layers
-        .filter(layer => {
-          return layer.id !== 'boundary-water';
-        })
-        .map(layer => {
-          if (layer.id === 'background') {
-            layer.paint['background-color'] = LAND;
-          }
-
-          // water
-          if (layer.paint['fill-color'] === 'hsl(210, 67%, 85%)') {
-            layer.paint['fill-color'] = OCEAN;
-          }
-
-          if (layer.paint['line-color'] === '#a0c8f0') {
-            layer.paint['line-color'] = DARK_OCEAN;
-          }
-          if (layer.paint['fill-color'] === '#a0c8f0') {
-            layer.paint['fill-color'] = DARK_OCEAN;
-          }
-          return layer;
-        });
-
       const map = new maplibregl.Map({
-        zoom: 2,
+        zoom: 1,
         minZoom: 2,
         maxZoom: 12,
         attributionControl: false,
         dragRotate: false,
         doubleClickZoom: false,
-        style: style,
+        style: mapStyle(),
         container: rootNode,
-        interactive: true
+        interactive: true,
+        cooperativeGestures: true,
+        center: [133.28, -28.15]
       });
 
       // Zoom to cyclone
@@ -450,6 +438,13 @@
       &:hover {
         background: rgb(0 0 0/5%);
       }
+    }
+    body .maplibregl-cooperative-gesture-screen > div {
+      padding: 20px 40px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 1rem;
+      backdrop-filter: blur(10px);
+      color: black;
     }
 
     .geomap__popup {

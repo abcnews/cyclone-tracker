@@ -1,19 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type * as MapLibre from './maplibre-gl.d.ts';
+  import versions from './_versions.json' assert { type: 'json' };
 
-  const MAPLIBRE_URL = 'https://www.abc.net.au/res/sites/news-projects/maplibre/v5.3.0/maplibre-gl.js';
-  const MAPLIBRE_CSS_URL = 'https://www.abc.net.au/res/sites/news-projects/maplibre/v5.3.0/maplibre-gl.css';
   const {
-    onLoad,
-    style
+    onLoad
   }: {
-    onLoad: ({}: {
-      rootNode: HTMLDivElement;
-      maplibregl: typeof window.maplibregl;
-      style: any;
-    }) => void | Promise<void>;
-    style: string;
+    onLoad: ({}: { rootNode: HTMLDivElement; maplibregl: typeof window.maplibregl }) => void | Promise<void>;
   } = $props();
   let rootNode = $state<HTMLDivElement>();
 
@@ -55,12 +48,8 @@
     if (!rootNode) {
       throw new Error('Root missing');
     }
-    const [loadedStyle] = await Promise.all([
-      style && fetch(style).then(res => res.json()),
-      importModule(MAPLIBRE_URL),
-      loadCss(MAPLIBRE_CSS_URL)
-    ]);
-    onLoad({ rootNode, maplibregl: window.maplibregl, style: loadedStyle });
+    await Promise.all([importModule(versions.MAPLIBRE_URL), loadCss(versions.MAPLIBRE_CSS_URL)]);
+    onLoad({ rootNode, maplibregl: window.maplibregl });
   });
 </script>
 
