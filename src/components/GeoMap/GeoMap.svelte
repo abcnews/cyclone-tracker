@@ -22,6 +22,8 @@
   let clientHeight = $state(0);
   /** Currently opened popup so we can close it l8r */
   let currentPopup = writable<Popup | undefined>();
+
+  const MAX_ZOOM = 8;
 </script>
 
 <div class="sr-only" id="geomap-alt">
@@ -47,7 +49,7 @@
       const map = new maplibregl.Map({
         zoom: 1,
         minZoom: 2,
-        maxZoom: 12,
+        maxZoom: MAX_ZOOM,
         attributionControl: false,
         dragRotate: false,
         doubleClickZoom: false,
@@ -77,7 +79,7 @@
       );
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, {
-          maxZoom: 10
+          maxZoom: MAX_ZOOM
         });
       }
 
