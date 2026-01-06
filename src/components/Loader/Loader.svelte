@@ -14,12 +14,9 @@
     if (!cyclone) {
       return;
     }
-    let url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/${sample ? 'examples' : 'tcdata'}/${encodeURIComponent(cyclone)}`;
     // Sample data should only be used in the builder. index.ts hard-codes false
     // for prod.
-    if (sample) {
-      url = '/examples/' + encodeURIComponent(cyclone);
-    }
+    let url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/${sample ? 'examples' : 'tcdata'}/${encodeURIComponent(cyclone)}`;
     xml(url, (err, xml) => {
       if (err) {
         error = 'Could not load cyclone data';
