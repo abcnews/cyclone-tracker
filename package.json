@@ -1,12 +1,13 @@
 {
   "name": "interactive-cyclone-tracker",
-  "version": "1.0.0-pre",
+  "version": "4.0.0",
   "description": "A Svelte & D3 project to render cyclone GML from the Bureau of Meteorology",
   "license": "MIT",
   "private": true,
   "type": "module",
   "contributors": [
-    "Ash Kyd <kyd.ashley@abc.net.au>"
+    "Ash Kyd <kyd.ashley@abc.net.au>",
+    "Nathan Hoad <nathan@nathanhoad.net>"
   ],
   "aunty": {
     "type": "svelte",
