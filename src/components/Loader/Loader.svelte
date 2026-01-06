@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import GML from './loader';
   import App from '../App/App.svelte';
-  import { xml } from 'd3-request';
   import type { CycloneGeoJson } from './types';
 
   let { cyclone = '', sample = false } = $props();
@@ -17,15 +16,17 @@
     // Sample data should only be used in the builder. index.ts hard-codes false
     // for prod.
     let url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/${sample ? 'examples' : 'tcdata'}/${encodeURIComponent(cyclone)}`;
-    xml(url, (err, xml) => {
-      if (err) {
+    fetch(url)
+      .then(res => res.text())
+      .then(xmlString => new DOMParser().parseFromString(xmlString, 'application/xml'))
+      .then(xml => {
+        cycloneData = GML.parse(xml);
+        document.title = `${cycloneData.properties.distName} map`;
+      })
+      .catch(e => {
         error = 'Could not load cyclone data';
-        console.error(err);
-        return;
-      }
-      cycloneData = GML.parse(xml);
-      document.title = `${cycloneData.properties.distName} map`;
-    });
+        console.error(e);
+      });
   });
 
   onMount(() => {

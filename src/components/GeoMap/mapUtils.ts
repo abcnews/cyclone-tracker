@@ -1,26 +1,51 @@
-import * as turf from '@turf/turf';
 import type { CycloneGeoJson } from '../Loader/types';
 
 /**
- * Calculate bounds from GeoJSON features using Turf.js
+ * Calculate bounds from GeoJSON features
  */
 export function calculateGeoJSONBounds(data: CycloneGeoJson, bounds: maplibregl.LngLatBounds): maplibregl.LngLatBounds {
-  if (!data || !data.features || data.features.length === 0) {
+  if (!data?.features?.length) {
     return bounds;
   }
 
-  const bbox = turf.bbox(data);
-  const poly = turf.bboxPolygon(bbox);
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
 
-  const bufferAmount = data.properties?.isArchived ? 50 : 20;
-  const bufferedBounds = turf.buffer(poly, bufferAmount, { units: 'kilometers' });
+  // 1. Traverse all features and coordinates to find the extent
+  data.features.forEach(feature => {
+    const coords = getCoords(feature.geometry);
+    coords.forEach(([lng, lat]) => {
+      if (lng < minLng) minLng = lng;
+      if (lat < minLat) minLat = lat;
+      if (lng > maxLng) maxLng = lng;
+      if (lat > maxLat) maxLat = lat;
+    });
+  });
 
-  const bufferedBbox = bufferedBounds ? turf.bbox(bufferedBounds) : bbox;
+  // 2. Apply "Buffer" (Padding) in degrees
+  // Roughly: 1 degree latitude ≈ 111km.
+  // 50km ≈ 0.45°, 20km ≈ 0.18°
+  const padding = data.properties?.isArchived ? 0.45 : 0.18;
 
-  bounds.extend([bufferedBbox[0], bufferedBbox[1]]);
-  bounds.extend([bufferedBbox[2], bufferedBbox[3]]);
+  // 3. Extend the maplibre bounds
+  bounds.extend([minLng - padding, minLat - padding]);
+  bounds.extend([maxLng + padding, maxLat + padding]);
 
   return bounds;
+}
+
+/**
+ * Helper to recursively extract coordinates from any GeoJSON geometry type
+ */
+function getCoords(geometry: any): number[][] {
+  const { type, coordinates } = geometry;
+  if (type === 'Point') return [coordinates];
+  if (type === 'LineString' || type === 'MultiPoint') return coordinates;
+  if (type === 'Polygon' || type === 'MultiLineString') return coordinates.flat();
+  if (type === 'MultiPolygon') return coordinates.flat(2);
+  return [];
 }
 
 /**
