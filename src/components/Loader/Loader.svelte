@@ -9,7 +9,6 @@
   let error = $state('');
 
   $effect(() => {
-    console.log('loading cyclone');
     if (!cyclone) {
       return;
     }

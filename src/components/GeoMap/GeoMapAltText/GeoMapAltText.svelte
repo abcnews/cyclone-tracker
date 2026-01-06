@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { CycloneGeoJson, FixType, CategoryType, SymbolType } from '../../Loader/types';
+  /**@file
+   * an attempt to create a somewhat accessible rendition of the GML file.
+   * This will never be perfect, but considering the contents of the article
+   * should explain the broad strokes, this goes into more specific data.
+   */
+  import type { CycloneGeoJson } from '../../Loader/types';
 
-  // Runes: accept the full geojson object
   const { data }: { data: CycloneGeoJson } = $props();
-
-  // Extract unique warning and watch areas with deduplication, excluding Likely Tracks Area
-
-  // Use $derived for reactive data
   const uniqueWarnings = $derived.by(() => {
     const areas = new Map<string, { areatype: string; extent: string }>();
 
@@ -39,9 +39,6 @@
     );
   });
 
-  $effect(() => console.log({ highestCategory }));
-
-  // Format time for display
   function formatTime(timeString: string) {
     return new Date(timeString).toLocaleString('en-AU', {
       timeZone: 'Australia/Brisbane',

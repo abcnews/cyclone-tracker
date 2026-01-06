@@ -38,7 +38,6 @@
     params.append('cyclone', selectedCyclone);
     window.location.hash = params.toString();
   });
-  $effect(() => console.log('hash', hash));
 </script>
 
 {#snippet Viz()}
