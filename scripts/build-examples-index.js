@@ -1,5 +1,5 @@
 /** @file
- * Build an examples-index.json file forma. directory of files.
+ * Build an examples-index.json file from a directory of files.
  *
  * 1. get these files from the production tcdata dir, or the more verbose archive dir of the cyclone tracker service.
  * 2. chuck them in a dir called `examples`
