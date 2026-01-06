@@ -8,11 +8,9 @@
 
   let { data = null }: Props = $props();
 
-  // Ref for resize observer
-  let base = $state();
 </script>
 
-<div class="base" bind:this={base}>
+<div class="base">
   <div class="base__map">
     {#key data}
       <GeoMap {data} />
