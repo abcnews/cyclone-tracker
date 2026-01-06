@@ -3,40 +3,33 @@
   import GeoMap from '../GeoMap/GeoMap.svelte';
 
   interface Props {
-    // Props
-    cities?: any;
     data?: any;
-    embedded?: boolean;
-    index?: any;
   }
 
-  let { data = null, embedded = false, index = Math.floor(Math.random() * 100000).toString() }: Props = $props();
+  let { data = null }: Props = $props();
 
   // Ref for resize observer
   let base = $state();
-
-  // Computed class names
-  let containerClasses = $derived(['base', embedded ? 'base--embedded' : ''].filter(Boolean).join(' '));
 </script>
 
-<div class={containerClasses} bind:this={base}>
+<div class="base" bind:this={base}>
   <div class="base__map">
-    <GeoMap {data} />
+    {#key data}
+      <GeoMap {data} />
+    {/key}
   </div>
 
   <Legend {data} />
 </div>
 
 <style lang="scss">
-  :global {
-  }
   .base {
     position: relative;
     overflow: hidden;
     border-radius: 1rem;
 
     width: 100%;
-    height: 100vh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     // Doesn't work on dark mode yet

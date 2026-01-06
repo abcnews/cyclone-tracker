@@ -1,7 +1,11 @@
 <script lang="ts">
   import { BuilderStyleRoot, BuilderFrame } from '@abcnews/components-builder';
   import { onMount } from 'svelte';
+  import Loader from '../Loader/Loader.svelte';
   const defaultParams = new URLSearchParams(location.hash.slice(1));
+
+  const params = new URLSearchParams(location.search);
+  let sample = $state(params.get('sample'));
 
   let selectedCyclone = $state(defaultParams.get('cyclone') || '');
   let checkDate = $state();
@@ -12,7 +16,11 @@
       hash = window.location.hash.slice(1);
     });
 
-    const res = await fetch('https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/cyclones.json');
+    const res = await fetch(
+      `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/${
+        sample ? 'examples-index.json' : 'cyclones.json'
+      }`
+    );
     const data = await res.json();
     const cyclones = data.cyclones.map(({ path, ...rest }) => ({
       path: path.replace('dist/', ''),
@@ -30,19 +38,30 @@
     params.append('cyclone', selectedCyclone);
     window.location.hash = params.toString();
   });
+  $effect(() => console.log('hash', hash));
 </script>
 
 {#snippet Viz()}
-  <iframe class="iframe" src={`../?${hash}`} title="Preview"></iframe>
+  <div class="frame">
+    <Loader cyclone={selectedCyclone} sample={!!sample} />
+  </div>
 {/snippet}
 
 {#snippet Sidebar()}
   <fieldset>
     <legend>Cyclone</legend>
-    <small>
-      Data last checked <br />
-      {new Date(checkDate).toString().replace(/\(.*/, '')}
-    </small>
+    {#if sample}
+      <div>
+        <strong>Historical data for evaluation only.</strong>
+        Go <a href={String(window.location).replace('sample=true', '')}>back to live data</a>
+      </div>
+    {/if}
+    {#if !sample}
+      <small>
+        Data last checked <br />
+        {new Date(checkDate).toString().replace(/\(.*/, '')}
+      </small>
+    {/if}
     <hr />
     <label>
       Cyclone:
@@ -63,7 +82,9 @@
     <legend>Iframe url</legend>
     <input
       readonly
-      value={`https://${location.host}${location.pathname.replace('/builder', '/')}?${hash}&abcnewsembedheight=600`}
+      value={sample
+        ? 'HISTORICAL DATA DO NOT USE'
+        : `https://${location.host}${location.pathname.replace(/\/builder\/?/, '/')}?${hash}&abcnewsembedheight=600`}
     />
   </fieldset>
 {/snippet}
@@ -73,9 +94,10 @@
 </BuilderStyleRoot>
 
 <style lang="scss">
-  .iframe {
+  .frame {
     width: 100%;
     height: 100%;
     border: 0;
+    position: relative;
   }
 </style>

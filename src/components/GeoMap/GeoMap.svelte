@@ -14,12 +14,10 @@
   import type { Popup } from '../MapLibre/maplibre-gl';
   import GeoMapAltText from './GeoMapAltText/GeoMapAltText.svelte';
   import mapStyle from './mapStyle/mapStyle';
-  import { bboxPolygon, buffer } from '@turf/turf';
 
   let { data }: { data: CycloneGeoJson } = $props();
   let isLoaded = $state(false);
   let clientWidth = $state(0);
-  let clientHeight = $state(0);
   /** Currently opened popup so we can close it l8r */
   let currentPopup = writable<Popup | undefined>();
 
@@ -30,14 +28,7 @@
   <GeoMapAltText {data} />
 </div>
 
-<div
-  class="geo-map"
-  style:opacity={isLoaded ? 1 : 0}
-  bind:clientWidth
-  bind:clientHeight
-  role="img"
-  aria-describedby="geomap-alt"
->
+<div class="geo-map" style:opacity={isLoaded ? 1 : 0} bind:clientWidth role="img" aria-describedby="geomap-alt">
   <MapLibre
     onLoad={async ({ rootNode, maplibregl }) => {
       if (process.env.NODE_ENV === 'development') {

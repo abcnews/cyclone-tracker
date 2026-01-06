@@ -12,11 +12,15 @@ whenDOMReady.then(async () => {
   [appMountEl] = selectMounts('interactivecyclonetracker');
 
   if (appMountEl) {
-    appProps = acto(getMountValue(appMountEl));
+    const params = new URLSearchParams(location.search);
+    let cyclone = params.get('cyclone') || undefined;
 
     mount(Loader, {
       target: appMountEl,
-      props: appProps
+      props: {
+        cyclone,
+        sample: false
+      }
     });
   }
 

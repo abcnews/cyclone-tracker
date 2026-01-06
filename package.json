@@ -4,6 +4,7 @@
   "description": "A Svelte & D3 project to render cyclone GML from the Bureau of Meteorology",
   "license": "MIT",
   "private": true,
+  "type": "module",
   "contributors": [
     "Ash Kyd <kyd.ashley@abc.net.au>"
   ],

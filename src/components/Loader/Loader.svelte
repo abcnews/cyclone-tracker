@@ -5,19 +5,20 @@
   import { xml } from 'd3-request';
   import type { CycloneGeoJson } from './types';
 
-  const params = new URLSearchParams(location.search);
-  let cyclone = $state(params.get('cyclone'));
-  let sample = $state(params.get('sample'));
+  let { cyclone = '', sample = false } = $props();
   let cycloneData = $state<CycloneGeoJson>();
   let error = $state('');
 
-  onMount(() => {
+  $effect(() => {
+    console.log('loading cyclone');
     if (!cyclone) {
       return;
     }
-    let url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/${encodeURIComponent(cyclone)}`;
-    if (sample === 'true') {
-      url = 'examples/' + encodeURIComponent(cyclone);
+    let url = `https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/${sample ? 'examples' : 'tcdata'}/${encodeURIComponent(cyclone)}`;
+    // Sample data should only be used in the builder. index.ts hard-codes false
+    // for prod.
+    if (sample) {
+      url = '/examples/' + encodeURIComponent(cyclone);
     }
     xml(url, (err, xml) => {
       if (err) {
