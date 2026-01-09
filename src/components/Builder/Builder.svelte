@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BuilderStyleRoot, BuilderFrame } from '@abcnews/components-builder';
+  import { BuilderStyleRoot, BuilderFrame, UpdateChecker } from '@abcnews/components-builder';
   import { onMount } from 'svelte';
   import Loader from '../Loader/Loader.svelte';
   const defaultParams = new URLSearchParams(location.hash.slice(1));
@@ -86,6 +86,7 @@
         : `https://${location.host}${location.pathname.replace(/\/builder\/?/, '/')}?${hash}&abcnewsembedheight=600`}
     />
   </fieldset>
+  <UpdateChecker />
 {/snippet}
 
 <BuilderStyleRoot>
