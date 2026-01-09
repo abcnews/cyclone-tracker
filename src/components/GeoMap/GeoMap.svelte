@@ -77,6 +77,17 @@
       await Promise.all([new Promise(resolve => map.on('load', resolve))]);
       isLoaded = true;
 
+      // Find the first symbol (label) layer to insert custom layers before it
+      // Otherwise the solid layers obscure place names
+      const layers = map.getStyle().layers;
+      let firstSymbolId;
+      for (const layer of layers) {
+        if (layer.type === 'symbol') {
+          firstSymbolId = layer.id;
+          break;
+        }
+      }
+
       map.setProjection({
         type: 'globe' // Set projection to globe
       });
@@ -99,29 +110,32 @@
       });
 
       // WATCH & WARNING AREAS
-      map.addLayer({
-        id: 'geojson-watch-warning-areas',
-        type: 'fill',
-        source: 'geojson-data',
-        filter: [
-          'all',
-          ['==', ['geometry-type'], 'Polygon'],
-          ['any', ['==', ['get', 'areatype'], 'Watch Area'], ['==', ['get', 'areatype'], 'Warning Area']]
-        ],
-        paint: {
-          'fill-color': [
-            'case',
-            // Check for area types
-            ['==', ['get', 'areatype'], 'Watch Area'],
-            colourConfig.fill['Watch Area'],
-            ['==', ['get', 'areatype'], 'Warning Area'],
-            colourConfig.fill['Warning Area'],
-            // Default fill color
-            'transparent'
+      map.addLayer(
+        {
+          id: 'geojson-watch-warning-areas',
+          type: 'fill',
+          source: 'geojson-data',
+          filter: [
+            'all',
+            ['==', ['geometry-type'], 'Polygon'],
+            ['any', ['==', ['get', 'areatype'], 'Watch Area'], ['==', ['get', 'areatype'], 'Warning Area']]
           ],
-          'fill-opacity': 1
-        }
-      });
+          paint: {
+            'fill-color': [
+              'case',
+              // Check for area types
+              ['==', ['get', 'areatype'], 'Watch Area'],
+              colourConfig.fill['Watch Area'],
+              ['==', ['get', 'areatype'], 'Warning Area'],
+              colourConfig.fill['Warning Area'],
+              // Default fill color
+              'transparent'
+            ],
+            'fill-opacity': 1
+          }
+        },
+        firstSymbolId
+      );
 
       map.on('click', 'geojson-watch-warning-areas', e => {
         const { areatype, extent } = e.features?.[0]?.properties || {};
@@ -142,139 +156,157 @@
       });
 
       // UNCERTAINTY PATTERN
-      map.addLayer({
-        id: 'geojson-uncertainty',
-        type: 'fill',
-        source: 'geojson-data',
-        filter: ['all', ['==', ['get', 'areatype'], 'Likely Tracks Area']],
-        paint: {
-          'fill-opacity': [
-            'case',
-            ['==', ['get', 'extent'], 'Up to 72 hours'],
-            0.3, // Full opacity for pattern
-            ['==', ['get', 'extent'], 'Up to 120 hours'],
-            0.15, // Full opacity for pattern
-            1 // Default opacity
-          ],
-          'fill-pattern': 'uncertainty-pattern'
-        }
-      });
+      map.addLayer(
+        {
+          id: 'geojson-uncertainty',
+          type: 'fill',
+          source: 'geojson-data',
+          filter: ['all', ['==', ['get', 'areatype'], 'Likely Tracks Area']],
+          paint: {
+            'fill-opacity': [
+              'case',
+              ['==', ['get', 'extent'], 'Up to 72 hours'],
+              0.3, // Full opacity for pattern
+              ['==', ['get', 'extent'], 'Up to 120 hours'],
+              0.15, // Full opacity for pattern
+              1 // Default opacity
+            ],
+            'fill-pattern': 'uncertainty-pattern'
+          }
+        },
+        firstSymbolId
+      );
 
       // STROKES AND ARROWS FOR CYCLONE TRACK
-      map.addLayer({
-        id: 'geojson-track-observed',
-        type: 'line',
-        source: 'geojson-data',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
+      map.addLayer(
+        {
+          id: 'geojson-track-observed',
+          type: 'line',
+          source: 'geojson-data',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          filter: ['all', ['==', ['get', 'tracktype'], 'Observed']],
+          paint: {
+            'line-color': colourConfig.stroke.Observed,
+            'line-width': 3,
+            'line-dasharray': [2, 1],
+            'line-offset': 0
+          }
         },
-        filter: ['all', ['==', ['get', 'tracktype'], 'Observed']],
-        paint: {
-          'line-color': colourConfig.stroke.Observed,
-          'line-width': 3,
-          'line-dasharray': [2, 1],
-          'line-offset': 0
-        }
-      });
+        firstSymbolId
+      );
 
-      map.addLayer({
-        id: 'geojson-track-forecast',
-        type: 'line',
-        source: 'geojson-data',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
+      map.addLayer(
+        {
+          id: 'geojson-track-forecast',
+          type: 'line',
+          source: 'geojson-data',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          filter: ['all', ['==', ['get', 'tracktype'], 'Forecast']],
+          paint: {
+            'line-color': colourConfig.stroke.Forecast,
+            'line-width': 3,
+            'line-dasharray': [1, 2],
+            'line-offset': 0
+          }
         },
-        filter: ['all', ['==', ['get', 'tracktype'], 'Forecast']],
-        paint: {
-          'line-color': colourConfig.stroke.Forecast,
-          'line-width': 3,
-          'line-dasharray': [1, 2],
-          'line-offset': 0
-        }
-      });
+        firstSymbolId
+      );
 
-      map.addLayer({
-        id: 'geojson-track-arrows',
-        type: 'symbol',
-        source: 'geojson-data',
-        filter: ['any', ['==', ['get', 'tracktype'], 'Forecast'], ['==', ['get', 'tracktype'], 'Observed']],
-        layout: {
-          'symbol-placement': 'line',
-          'symbol-spacing': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10,
-            100, //px
-            14,
-            90, //px
-            18,
-            60 // denser at high zooms
-          ],
-          'icon-image': 'arrow',
-          'icon-size': 0.75,
-          'icon-rotation-alignment': 'map',
-          'icon-allow-overlap': true
-        }
-      });
+      map.addLayer(
+        {
+          id: 'geojson-track-arrows',
+          type: 'symbol',
+          source: 'geojson-data',
+          filter: ['any', ['==', ['get', 'tracktype'], 'Forecast'], ['==', ['get', 'tracktype'], 'Observed']],
+          layout: {
+            'symbol-placement': 'line',
+            'symbol-spacing': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              10,
+              100, //px
+              14,
+              90, //px
+              18,
+              60 // denser at high zooms
+            ],
+            'icon-image': 'arrow',
+            'icon-size': 0.75,
+            'icon-rotation-alignment': 'map',
+            'icon-allow-overlap': true
+          }
+        },
+        firstSymbolId
+      );
 
       // CURRENT WIND FILLS
-      map.addLayer({
-        id: 'geojson-wind-fill',
-        type: 'fill',
-        source: 'geojson-data',
-        filter: ['all', ['==', ['geometry-type'], 'Polygon'], ['==', ['get', 'fixtype'], 'Current']],
-        paint: {
-          'fill-color': [
-            'case',
-            ['==', ['get', 'windtype'], 'Damaging'],
-            colourConfig.fill.Damaging,
-            ['==', ['get', 'windtype'], 'Destructive'],
-            colourConfig.fill.Destructive,
-            ['==', ['get', 'windtype'], 'Very Destructive'],
-            colourConfig.fill['Very Destructive'],
-            // Default fill color
-            'transparent'
-          ],
-          'fill-opacity': 1
-        }
-      });
+      map.addLayer(
+        {
+          id: 'geojson-wind-fill',
+          type: 'fill',
+          source: 'geojson-data',
+          filter: ['all', ['==', ['geometry-type'], 'Polygon'], ['==', ['get', 'fixtype'], 'Current']],
+          paint: {
+            'fill-color': [
+              'case',
+              ['==', ['get', 'windtype'], 'Damaging'],
+              colourConfig.fill.Damaging,
+              ['==', ['get', 'windtype'], 'Destructive'],
+              colourConfig.fill.Destructive,
+              ['==', ['get', 'windtype'], 'Very Destructive'],
+              colourConfig.fill['Very Destructive'],
+              // Default fill color
+              'transparent'
+            ],
+            'fill-opacity': 1
+          }
+        },
+        firstSymbolId
+      );
 
       // WIND STROKES
-      map.addLayer({
-        id: 'geojson-wind-stroke',
-        type: 'line',
-        source: 'geojson-data',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
+      map.addLayer(
+        {
+          id: 'geojson-wind-stroke',
+          type: 'line',
+          source: 'geojson-data',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          filter: ['any', ['has', 'windtype']],
+          paint: {
+            'line-color': [
+              'case',
+              ['==', ['get', 'windtype'], 'Damaging'],
+              colourConfig.stroke.Damaging,
+              ['==', ['get', 'windtype'], 'Destructive'],
+              colourConfig.stroke.Destructive,
+              ['==', ['get', 'windtype'], 'Very Destructive'],
+              colourConfig.stroke['Very Destructive'],
+              // Default color
+              'transparent' // Default to fix color
+            ],
+            'line-width': [
+              'case',
+              // Different line widths for different feature types
+              ['has', 'windtype'],
+              2, // Thicker lines for wind areas
+              ['has', 'extent'],
+              2, // Medium lines for extent areas
+              1 // Default line width
+            ]
+          }
         },
-        filter: ['any', ['has', 'windtype']],
-        paint: {
-          'line-color': [
-            'case',
-            ['==', ['get', 'windtype'], 'Damaging'],
-            colourConfig.stroke.Damaging,
-            ['==', ['get', 'windtype'], 'Destructive'],
-            colourConfig.stroke.Destructive,
-            ['==', ['get', 'windtype'], 'Very Destructive'],
-            colourConfig.stroke['Very Destructive'],
-            // Default color
-            'transparent' // Default to fix color
-          ],
-          'line-width': [
-            'case',
-            // Different line widths for different feature types
-            ['has', 'windtype'],
-            2, // Thicker lines for wind areas
-            ['has', 'extent'],
-            2, // Medium lines for extent areas
-            1 // Default line width
-          ]
-        }
-      });
+        firstSymbolId
+      );
 
       // CYCLONE MARKERS
       data.features.forEach(feature => {
