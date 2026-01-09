@@ -3,22 +3,206 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body,
-      html {
-        margin: 0;
-        padding: 0;
-        background: none transparent !important;
+    <title>interactive-cyclone-tracker</title>
+    <script src="index.js"></script>
+    <style type="text/css">
+      #interactivecyclonetracker {
+        height: 100vh;
+        position: relative;
+      }
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 300;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-light.woff2) format('woff2');
+        font-display: swap;
       }
 
-      * {
-        box-sizing: border-box;
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 400;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-regular.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 700;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-bold.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 800;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-black.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 300;
+        font-style: italic;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-lightitalic.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 400;
+        font-style: italic;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-italic.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 700;
+        font-style: italic;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-bolditalic.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans;
+        font-weight: 800;
+        font-style: italic;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-blackitalic.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Condensed;
+        font-weight: 300;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedlight.woff2)
+          format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Condensed;
+        font-weight: 400;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedlight.woff2)
+          format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Condensed;
+        font-weight: 700;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedbold.woff2)
+          format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Condensed;
+        font-weight: 800;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedbold.woff2)
+          format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Rounded;
+        font-weight: 400;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-rounded.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Rounded;
+        font-weight: 700;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-roundedbold.woff2) format('woff2');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Tabbed;
+        font-weight: 300;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-light-tabnumbers.woff2)
+            format('opentype'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-light-tabnumbers.woff) format('woff');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Tabbed;
+        font-weight: 400;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regular-tabnumbers.woff2)
+            format('opentype'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regular-tabnumbers.woff) format('woff');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Tabbed;
+        font-weight: 400;
+        font-style: italic;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regularitalic-tabnumbers.woff2)
+            format('opentype'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regularitalic-tabnumbers.woff)
+            format('woff');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Tabbed;
+        font-weight: 700;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-bold-tabnumbers.woff2)
+            format('opentype'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-bold-tabnumbers.woff) format('woff');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSans Tabbed;
+        font-weight: 800;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-black-tabnumbers.woff2)
+            format('opentype'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-black-tabnumbers.woff) format('woff');
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: ABCSerif;
+        font-weight: 400;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular.woff2) format('woff2'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular.woff) format('woff');
+      }
+
+      @font-face {
+        font-family: ABCSerif;
+        font-weight: 400;
+        font-style: italic;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular_italic.woff2) format('woff2'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular_italic.woff) format('woff');
+      }
+
+      @font-face {
+        font-family: ABCSerif;
+        font-weight: 700;
+        font-style: normal;
+        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-bold.woff2) format('woff2'),
+          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-bold.woff) format('woff');
       }
     </style>
   </head>
-
   <body>
-    <div data-cyclone-tracker-root></div>
-    <script src="index.js"></script>
+    <div data-mount id="interactivecyclonetracker"></div>
   </body>
 </html>

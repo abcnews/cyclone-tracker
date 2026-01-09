@@ -1,11 +1,12 @@
 # dependencies
 /node_modules
 
-# builds
-/build
+# environment
+.env
+
+# output
 /.aunty
 
 # misc
 .DS_Store
 npm-debug.log
-/artifacts

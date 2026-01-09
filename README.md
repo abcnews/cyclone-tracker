@@ -1,4 +1,4 @@
-# Cyclone Tracker
+# interactive-cyclone-tracker
 
 Render BOM Cyclone GML files on a map.
 
@@ -14,11 +14,3 @@ Example in articles:
 3. 120kph = 5s
 4. 160kph = 3.8s
 5. 200kph = 3s
-
-## Authors
-
-- Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))
-
-## Live iframe view
-
-eg. https://www.abc.net.au/res/sites/news-projects/cyclone-tracker/3.2.10/?cyclone=AU202425_22U.gml

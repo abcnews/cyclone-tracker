@@ -1,43 +1,43 @@
 {
-	"name": "cyclone-tracker",
-	"version": "3.3.2",
-	"description": "Renders a given cyclone on a map of Australia",
-	"license": "MIT",
-	"private": true,
-	"contributors": [
-		"Nathan Hoad <nathan@nathanhoad.net>"
-	],
-	"aunty": "react",
-	"scripts": {
-		"start": "aunty serve",
-		"test": "jest"
-	},
-	"jest": {
-		"transform": {
-			".*": "<rootDir>/node_modules/@abcnews/aunty/src/utils/jest"
-		}
-	},
-	"devDependencies": {
-		"@abcnews/aunty": "^16.0.0",
-		"babel-preset-env": "^1.6.1",
-		"babel-preset-react": "^6.24.1",
-		"jest": "^21.2.1",
-		"react-test-renderer": "^16.2.0"
-	},
-	"dependencies": {
-		"d3-geo": "^1.9.1",
-		"d3-request": "^1.0.6",
-		"d3-selection": "^1.2.0",
-		"d3-transition": "^1.1.1",
-		"date-fns": "^1.29.0",
-		"es6-promise": "^4.2.2",
-		"hash-codec": "github:ashkyd/hash-codec",
-		"lodash": "^4.17.4",
-		"object-assign": "^4.1.1",
-		"react": "^16.2.0",
-		"react-dom": "^16.2.0",
-		"svg-path-properties": "^0.4.7",
-		"tinycolor2": "^1.4.1",
-		"topojson": "^3.0.2"
-	}
+  "name": "interactive-cyclone-tracker",
+  "version": "4.0.0",
+  "description": "A Svelte & D3 project to render cyclone GML from the Bureau of Meteorology",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "contributors": [
+    "Ash Kyd <kyd.ashley@abc.net.au>",
+    "Nathan Hoad <nathan@nathanhoad.net>"
+  ],
+  "aunty": {
+    "type": "svelte",
+    "build": {
+      "entry": [
+        "index"
+      ],
+      "includedDependencies": [
+        "@abcnews/components-builder"
+      ]
+    }
+  },
+  "scripts": {
+    "start": "aunty serve",
+    "dev": "aunty serve",
+    "test": "aunty test"
+  },
+  "devDependencies": {
+    "@abcnews/aunty": "^16.0.0",
+    "@testing-library/svelte": "^5.2.9",
+    "@types/jest": "^30.0.0",
+    "@types/webpack-env": "^1.18.8"
+  },
+  "dependencies": {
+    "@abcnews/alternating-case-to-object": "^3.2.0",
+    "@abcnews/components-builder": "^0.0.12",
+    "@abcnews/env-utils": "^5.0.2",
+    "@abcnews/mount-utils": "^3.0.0",
+    "date-fns": "^1.29.0",
+    "lodash-es": "^4.17.21",
+    "svelte": "^5.43.14"
+  }
 }
