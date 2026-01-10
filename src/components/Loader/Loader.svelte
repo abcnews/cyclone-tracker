@@ -29,19 +29,19 @@
   });
 
   onMount(() => {
-    try {
-      const frame = Array.from(window.parent.document.querySelectorAll('iframe'))?.find(
-        iframe => (iframe.src = String(window.location))
-      );
-      if (frame) {
-        frame.style.colorScheme = 'light';
-      }
-    } catch (e) {
-      console.warn(
-        'Cyclone tracker: Could not set dark mode on iframe. This only works in prod/same domain.',
-        e.message
-      );
-    }
+    // try {
+    //   const frame = Array.from(window.parent.document.querySelectorAll('iframe'))?.find(
+    //     iframe => (iframe.src = String(window.location))
+    //   );
+    //   if (frame) {
+    //     frame.style.colorScheme = 'light';
+    //   }
+    // } catch (e) {
+    //   console.warn(
+    //     'Cyclone tracker: Could not set dark mode on iframe. This only works in prod/same domain.',
+    //     e.message
+    //   );
+    // }
   });
 </script>
 
