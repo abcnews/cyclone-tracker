@@ -3,206 +3,123 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>interactive-cyclone-tracker</title>
-    <script src="index.js"></script>
+    <title>interactive-time-series-weather-map</title>
+    <script src="index.js" async></script>
+    <link
+      rel="modulepreload"
+      href="https://www.abc.net.au/res/sites/news-projects/maplibre/v5.3.0/maplibre-gl.js"
+      as="script"
+    />
+    <link
+      rel="preload"
+      href="https://www.abc.net.au/res/sites/news-projects/maplibre/v5.3.0/maplibre-gl.css"
+      as="style"
+    />
+    <link
+      rel="preload"
+      href="https://www.abc.net.au/res/sites/news-projects/map-vector-tiles-world/world.json"
+      as="fetch"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://www.abc.net.au/res/sites/news-projects/map-vector-style-bright/sprite@2x.json"
+      as="fetch"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://www.abc.net.au/res/sites/news-projects/map-vector-style-bright/sprite@2x.png"
+      as="fetch"
+      crossorigin
+    />
+
     <style type="text/css">
-      #interactivecyclonetracker {
-        height: 100vh;
-        position: relative;
+      #webpack-dev-server-client-overlay {
+        display: none !important;
+      }
+      html {
+        color-scheme: light;
+      }
+      html[data-scheme='dark'] {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        padding: 0;
       }
       @font-face {
         font-family: ABCSans;
-        font-weight: 300;
+        src: url('https://res.abc.net.au/fonts/abcsansnova/20211112/abcsansnova-regular.woff2') format('woff2');
         font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-light.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans;
         font-weight: 400;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-regular.woff2) format('woff2');
         font-display: swap;
       }
 
       @font-face {
         font-family: ABCSans;
+        src: url('https://res.abc.net.au/fonts/abcsansnova/20211112/abcsansnova-bold.woff2') format('woff2');
+        font-style: normal;
         font-weight: 700;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-bold.woff2) format('woff2');
         font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans;
-        font-weight: 800;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-black.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans;
-        font-weight: 300;
-        font-style: italic;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-lightitalic.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans;
-        font-weight: 400;
-        font-style: italic;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-italic.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans;
-        font-weight: 700;
-        font-style: italic;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-bolditalic.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans;
-        font-weight: 800;
-        font-style: italic;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-blackitalic.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Condensed;
-        font-weight: 300;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedlight.woff2)
-          format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Condensed;
-        font-weight: 400;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedlight.woff2)
-          format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Condensed;
-        font-weight: 700;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedbold.woff2)
-          format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Condensed;
-        font-weight: 800;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-condensedbold.woff2)
-          format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Rounded;
-        font-weight: 400;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-rounded.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Rounded;
-        font-weight: 700;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsansnova-roundedbold.woff2) format('woff2');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Tabbed;
-        font-weight: 300;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-light-tabnumbers.woff2)
-            format('opentype'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-light-tabnumbers.woff) format('woff');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Tabbed;
-        font-weight: 400;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regular-tabnumbers.woff2)
-            format('opentype'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regular-tabnumbers.woff) format('woff');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Tabbed;
-        font-weight: 400;
-        font-style: italic;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regularitalic-tabnumbers.woff2)
-            format('opentype'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-regularitalic-tabnumbers.woff)
-            format('woff');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Tabbed;
-        font-weight: 700;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-bold-tabnumbers.woff2)
-            format('opentype'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-bold-tabnumbers.woff) format('woff');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSans Tabbed;
-        font-weight: 800;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-black-tabnumbers.woff2)
-            format('opentype'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcsans-black-tabnumbers.woff) format('woff');
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: ABCSerif;
-        font-weight: 400;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular.woff2) format('woff2'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular.woff) format('woff');
-      }
-
-      @font-face {
-        font-family: ABCSerif;
-        font-weight: 400;
-        font-style: italic;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular_italic.woff2) format('woff2'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-regular_italic.woff) format('woff');
-      }
-
-      @font-face {
-        font-family: ABCSerif;
-        font-weight: 700;
-        font-style: normal;
-        src: url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-bold.woff2) format('woff2'),
-          url(https://static.abc-cdn.net.au/fonts/abcsansnova/20211112/abcserif-bold.woff) format('woff');
       }
     </style>
   </head>
   <body>
-    <div data-mount id="interactivecyclonetracker"></div>
+    <div
+      data-mount
+      id="interactivecyclonetracker"
+      style="color-scheme: light; background: white; color: black; border-radius: 1rem"
+      data-scheme="light"
+    ></div>
+    <script lang="text/javascript">
+      (() => {
+        // Speed up by preloading assets
+        const preload = (href, rel="preload", as="fetch", crossOrigin="anonymous") => {
+          document.head.appendChild(Object.assign(document.createElement('link'), { rel, href, as, crossOrigin }));
+        }
+        const cyclone = location.search.match(/cyclone=([A-Z0-9_]+\.gml)/)?.[1];
+        if(cyclone){
+          preload('https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/AU202526_02U.gml')
+        }
+
+        // Handle dark/light mode in most places
+        function tryLocalStorage(key){
+          try{ return localStorage[key] }catch(e){}
+        }
+
+        /** The parent page when iframed same-domain. */
+        const parentBody = (() => {
+          try{
+            return parent.location.href !== location.href ? parent.document.body : null;
+          }catch(e){
+            return null
+          }
+        })();
+
+        /** Set the colour scheme on the body */
+        const setScheme = (isDark) => (document.documentElement.dataset['scheme'] = isDark ? 'dark' : 'light');
+
+        /** ABC news site colour preference */
+        const pref = tryLocalStorage('abc:news:preferences:scheme');
+
+        if(['"dark"', '"light"'].includes(pref)){
+          // Set the light/dark colour preference immediately.
+          setScheme(pref === '"dark"');
+        }
+
+        if(parentBody) {
+          // if same-domain, observe colour scheme preference.
+          setScheme(parentBody.getAttribute('data-scheme'))
+          new MutationObserver(() => setScheme(parentBody.getAttribute('data-scheme')))
+            .observe(parentBody, { attributes: true, attributeFilter: ['data-scheme'] });
+        } else if(!pref || pref === '"auto"'){
+          // x-domain uses prefers-colour-scheme
+          setScheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+          window.matchMedia('(prefers-color-scheme: dark)')
+            .addEventListener('change', (e) => setScheme(e.matches));
+        }
+      })();
+    </script>
   </body>
 </html>

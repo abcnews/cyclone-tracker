@@ -29,6 +29,9 @@
 </div>
 
 <div class="geo-map" style:opacity={isLoaded ? 1 : 0} bind:clientWidth role="img" aria-describedby="geomap-alt">
+  <!-- 
+    Caution: when updating MapLibre, you must update the corresponding preloads in index.html.
+  -->
   <MapLibre
     onLoad={async ({ rootNode, maplibregl }) => {
       if (process.env.NODE_ENV === 'development') {

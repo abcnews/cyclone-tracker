@@ -74,6 +74,11 @@
     * {
       box-sizing: border-box;
     }
+    #interactivecyclonetracker {
+      height: 100vh;
+      position: relative;
+      border: 1px solid #cccccc;
+    }
   }
 
   .info.loader {
