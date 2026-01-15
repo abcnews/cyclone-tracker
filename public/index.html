@@ -110,8 +110,8 @@
 
         if(parentBody) {
           // if same-domain, observe colour scheme preference.
-          setScheme(parentBody.getAttribute('data-scheme'))
-          new MutationObserver(() => setScheme(parentBody.getAttribute('data-scheme')))
+          setScheme(parentBody.getAttribute('data-scheme')==='dark')
+          new MutationObserver(() => setScheme(parentBody.getAttribute('data-scheme')==='dark'))
             .observe(parentBody, { attributes: true, attributeFilter: ['data-scheme'] });
         } else if(!pref || pref === '"auto"'){
           // x-domain uses prefers-colour-scheme
