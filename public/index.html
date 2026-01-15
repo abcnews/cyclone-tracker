@@ -80,7 +80,7 @@
         }
         const cyclone = location.search.match(/cyclone=([A-Z0-9_]+\.gml)/)?.[1];
         if(cyclone){
-          preload('https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/AU202526_02U.gml')
+          preload(`https://abcnewsdata.sgp1.digitaloceanspaces.com/cyclonetracker-svc/tcdata/${cyclone}`)
         }
 
         // Handle dark/light mode in most places
