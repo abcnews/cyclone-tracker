@@ -1,6 +1,6 @@
 {
 	"name": "interactive-cyclone-tracker",
-	"version": "4.0.3",
+	"version": "4.0.4-0",
 	"description": "A Svelte & D3 project to render cyclone GML from the Bureau of Meteorology",
 	"license": "MIT",
 	"private": true,
