@@ -86,7 +86,7 @@ export function getCycloneBounds(data: CycloneGeoJson, LngLatBoundsClass: typeof
     const isWatchOrWarning = areatype === 'Watch Area' || areatype === 'Warning Area';
     const isWindPolygon = feature.geometry.type === 'Polygon' && windtype !== undefined;
     const isCyclonePoint =
-      feature.geometry.type === 'Point' && symbol === 'Cyclone' && ['Current', 'Forecast'].includes(fixtype || '');
+      (feature.geometry.type === 'Point' && fixtype === 'Current') || (symbol === 'Cyclone' && fixtype === 'Forecast');
 
     return isWatchOrWarning || isWindPolygon || isCyclonePoint;
   });
