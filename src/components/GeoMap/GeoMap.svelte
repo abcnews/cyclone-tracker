@@ -1,5 +1,6 @@
 <script lang="ts">
-  import MapLibre from '../MapLibre/MapLibre.svelte';
+  import type { maplibregl } from '@abcnews/components-storylab/mapLibre';
+  import { MapLibreLoader } from '@abcnews/components-storylab/mapLibre';
   import { type CycloneGeoJson } from '../Loader/types';
   import cycloneCategories from './cycloneCategories/cycloneCategories';
   import cycloneMarker from './htmlComponents/cycloneMarker';
@@ -11,7 +12,6 @@
   import arrowUrl from './arrow.png';
   import cycloneCurrentLabel from './htmlComponents/cycloneCurrentLabel';
   import { get, writable } from 'svelte/store';
-  import type { Popup } from '../MapLibre/maplibre-gl';
   import GeoMapAltText from './GeoMapAltText/GeoMapAltText.svelte';
   import mapStyle from './mapStyle/mapStyle';
 
@@ -19,7 +19,7 @@
   let isLoaded = $state(false);
   let clientWidth = $state(0);
   /** Currently opened popup so we can close it l8r */
-  let currentPopup = writable<Popup | undefined>();
+  let currentPopup = writable<maplibregl.Popup | undefined>();
 
   const MAX_ZOOM = 8;
 </script>
@@ -32,7 +32,7 @@
   <!-- 
     Caution: when updating MapLibre, you must update the corresponding preloads in index.html.
   -->
-  <MapLibre
+  <MapLibreLoader
     onLoad={async ({ rootNode, maplibregl }) => {
       if (process.env.NODE_ENV === 'development') {
         console.log({
