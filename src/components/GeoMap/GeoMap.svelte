@@ -21,7 +21,7 @@
   /** Currently opened popup so we can close it l8r */
   let currentPopup = writable<maplibregl.Popup | undefined>();
 
-  const MAX_ZOOM = 8;
+  const MAX_ZOOM = 7;
 </script>
 
 <div class="sr-only" id="geomap-alt">
@@ -53,6 +53,8 @@
         cooperativeGestures: true,
         center: [133.28, -28.15]
       });
+
+      map.on('zoom', () => console.log(map.getZoom()));
 
       // Zoom to cyclone
       const bounds = getCycloneBounds(data, maplibregl.LngLatBounds);
