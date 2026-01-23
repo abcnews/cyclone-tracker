@@ -1,47 +1,47 @@
 {
-  "name": "interactive-cyclone-tracker",
-  "version": "4.0.4",
-  "description": "A Svelte & D3 project to render cyclone GML from the Bureau of Meteorology",
-  "license": "MIT",
-  "private": true,
-  "type": "module",
-  "contributors": [
-    "Ash Kyd <kyd.ashley@abc.net.au>",
-    "Nathan Hoad <nathan@nathanhoad.net>"
-  ],
-  "aunty": {
-    "type": "svelte",
-    "build": {
-      "entry": [
-        "index"
-      ],
-      "includedDependencies": [
-        "@abcnews/components-builder",
-        "@abcnews/components-storylab",
-        "/Users/kyd.ashley/Web/components-storylab"
-      ]
-    }
-  },
-  "scripts": {
-    "start": "aunty serve",
-    "dev": "aunty serve",
-    "test": "aunty test"
-  },
-  "devDependencies": {
-    "@abcnews/aunty": "^16.0.0",
-    "@testing-library/svelte": "^5.2.9",
-    "@types/jest": "^30.0.0",
-    "@types/webpack-env": "^1.18.8"
-  },
-  "dependencies": {
-    "@abcnews/alternating-case-to-object": "^3.2.0",
-    "@abcnews/components-builder": "^0.0.12",
-    "@abcnews/components-storylab": "^0.0.2",
-    "@abcnews/env-utils": "^5.0.2",
-    "@abcnews/mount-utils": "^3.0.0",
-    "date-fns": "^1.29.0",
-    "lodash-es": "^4.17.21",
-    "maplibre-gl": "^5.16.0",
-    "svelte": "^5.43.14"
-  }
+	"name": "interactive-cyclone-tracker",
+	"version": "4.0.5",
+	"description": "A Svelte & D3 project to render cyclone GML from the Bureau of Meteorology",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"contributors": [
+		"Ash Kyd <kyd.ashley@abc.net.au>",
+		"Nathan Hoad <nathan@nathanhoad.net>"
+	],
+	"aunty": {
+		"type": "svelte",
+		"build": {
+			"entry": [
+				"index"
+			],
+			"includedDependencies": [
+				"@abcnews/components-builder",
+				"@abcnews/components-storylab",
+				"/Users/kyd.ashley/Web/components-storylab"
+			]
+		}
+	},
+	"scripts": {
+		"start": "aunty serve",
+		"dev": "aunty serve",
+		"test": "aunty test"
+	},
+	"devDependencies": {
+		"@abcnews/aunty": "^16.0.0",
+		"@testing-library/svelte": "^5.2.9",
+		"@types/jest": "^30.0.0",
+		"@types/webpack-env": "^1.18.8"
+	},
+	"dependencies": {
+		"@abcnews/alternating-case-to-object": "^3.2.0",
+		"@abcnews/components-builder": "^0.0.12",
+		"@abcnews/components-storylab": "^0.0.2",
+		"@abcnews/env-utils": "^5.0.2",
+		"@abcnews/mount-utils": "^3.0.0",
+		"date-fns": "^1.29.0",
+		"lodash-es": "^4.17.21",
+		"maplibre-gl": "^5.16.0",
+		"svelte": "^5.43.14"
+	}
 }
