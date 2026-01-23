@@ -67,42 +67,39 @@ export function safeHtml(text) {
  * * watch area
  * * warning area
  * * windType polygon
- * * points with a Cyclone symbol
+ * * current/future points with a Cyclone symbol
  * zoom to the extent that includes all of those polygons and points.
  *
  * If it's not archived, and no other conditions match, zoom to the current forecast fix + the remainder of the fixes.
  */
 export function getCycloneBounds(data: CycloneGeoJson, LngLatBoundsClass: typeof LngLatBounds): LngLatBounds {
-  let featuresToInclude = data.features;
+  const { isArchived } = data.properties;
 
-  if (!data.properties.isArchived) {
-    const specialFeatures = data.features.filter(feature => {
-      const { areatype, windtype, fixtype } = feature.properties;
-      const isWatchOrWarning = areatype === 'Watch Area' || areatype === 'Warning Area';
-      const isWindPolygon = feature.geometry.type === 'Polygon' && windtype !== undefined;
-      const isCyclonePoint = feature.geometry.type === 'Point' && ['Current', 'Forecast'].includes(fixtype || '');
-
-      return isWatchOrWarning || isWindPolygon || isCyclonePoint;
-    });
-
-    if (specialFeatures.length > 0) {
-      featuresToInclude = specialFeatures;
-    } else {
-      // Fallback: current forecast fix + the remainder of the fixes
-      featuresToInclude = data.features.filter(feature => {
-        const { fixtype } = feature.properties;
-        const isCurrentOrForecastFix =
-          feature.geometry.type === 'Point' && (fixtype === 'Current' || fixtype === 'Forecast');
-        return isCurrentOrForecastFix;
-      });
-    }
+  // 1. If archived, show everything.
+  if (isArchived) {
+    return calculateGeoJSONBounds(data, new LngLatBoundsClass());
   }
 
-  return calculateGeoJSONBounds(
-    {
-      ...data,
-      features: featuresToInclude
-    },
-    new LngLatBoundsClass()
-  );
+  // 2. If we have special areas or cyclone points, zoom to those.
+  const specialFeatures = data.features.filter(feature => {
+    const { areatype, windtype, symbol, fixtype } = feature.properties;
+    const isWatchOrWarning = areatype === 'Watch Area' || areatype === 'Warning Area';
+    const isWindPolygon = feature.geometry.type === 'Polygon' && windtype !== undefined;
+    const isCyclonePoint =
+      feature.geometry.type === 'Point' && symbol === 'Cyclone' && ['Current', 'Forecast'].includes(fixtype || '');
+
+    return isWatchOrWarning || isWindPolygon || isCyclonePoint;
+  });
+
+  if (specialFeatures.length > 0) {
+    return calculateGeoJSONBounds({ ...data, features: specialFeatures }, new LngLatBoundsClass());
+  }
+
+  // 3. Otherwise: current forecast fix + the remainder of the fixes.
+  const fallbackFeatures = data.features.filter(feature => {
+    const { fixtype } = feature.properties;
+    return feature.geometry.type === 'Point' && (fixtype === 'Current' || fixtype === 'Forecast');
+  });
+
+  return calculateGeoJSONBounds({ ...data, features: fallbackFeatures }, new LngLatBoundsClass());
 }
