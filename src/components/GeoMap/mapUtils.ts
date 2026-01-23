@@ -1,3 +1,4 @@
+import type { LngLatBounds } from 'maplibre-gl';
 import type { CycloneGeoJson } from '../Loader/types';
 
 /**
@@ -55,4 +56,53 @@ export function safeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/**
+ * Calculate the bounds for the cyclone based on business logic.
+ *
+ * If isArchived, show the whole thing.
+ *
+ * If we have any of the following:
+ * * watch area
+ * * warning area
+ * * windType polygon
+ * * points with a Cyclone symbol
+ * zoom to the extent that includes all of those polygons and points.
+ *
+ * If it's not archived, and no other conditions match, zoom to the current forecast fix + the remainder of the fixes.
+ */
+export function getCycloneBounds(data: CycloneGeoJson, LngLatBoundsClass: typeof LngLatBounds): LngLatBounds {
+  let featuresToInclude = data.features;
+
+  if (!data.properties.isArchived) {
+    const specialFeatures = data.features.filter(feature => {
+      const { areatype, windtype, fixtype } = feature.properties;
+      const isWatchOrWarning = areatype === 'Watch Area' || areatype === 'Warning Area';
+      const isWindPolygon = feature.geometry.type === 'Polygon' && windtype !== undefined;
+      const isCyclonePoint = feature.geometry.type === 'Point' && ['Current', 'Forecast'].includes(fixtype || '');
+
+      return isWatchOrWarning || isWindPolygon || isCyclonePoint;
+    });
+
+    if (specialFeatures.length > 0) {
+      featuresToInclude = specialFeatures;
+    } else {
+      // Fallback: current forecast fix + the remainder of the fixes
+      featuresToInclude = data.features.filter(feature => {
+        const { fixtype } = feature.properties;
+        const isCurrentOrForecastFix =
+          feature.geometry.type === 'Point' && (fixtype === 'Current' || fixtype === 'Forecast');
+        return isCurrentOrForecastFix;
+      });
+    }
+  }
+
+  return calculateGeoJSONBounds(
+    {
+      ...data,
+      features: featuresToInclude
+    },
+    new LngLatBoundsClass()
+  );
 }

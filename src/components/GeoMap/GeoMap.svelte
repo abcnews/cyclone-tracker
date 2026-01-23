@@ -7,13 +7,13 @@
   import markerPopup from './htmlComponents/markerPopup';
   import warningPopup from './htmlComponents/warningPopup';
   import colourConfig from './colours';
-  import { calculateGeoJSONBounds } from './mapUtils';
   import uncertaintyPatternUrl from './uncertainty-pattern.png';
   import arrowUrl from './arrow.png';
   import cycloneCurrentLabel from './htmlComponents/cycloneCurrentLabel';
   import { get, writable } from 'svelte/store';
   import GeoMapAltText from './GeoMapAltText/GeoMapAltText.svelte';
   import mapStyle from './mapStyle/mapStyle';
+  import { getCycloneBounds } from './mapUtils';
 
   let { data }: { data: CycloneGeoJson } = $props();
   let isLoaded = $state(false);
@@ -35,7 +35,7 @@
   <MapLibreLoader
     onLoad={async ({ rootNode, maplibregl }) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log({
+        console.log('DEV MODE', {
           data: $state.snapshot(data)
         });
       }
@@ -55,22 +55,7 @@
       });
 
       // Zoom to cyclone
-      const bounds = calculateGeoJSONBounds(
-        {
-          ...data,
-          features: data.features.filter(feature => {
-            // If archived, show the whole path.
-            if (data.properties.isArchived) {
-              return true;
-            }
-
-            // Only  show current & future features while the cyclone is active
-            const isObserved = feature.properties.fixtype === 'Observed' || feature.properties.tracktype === 'Observed';
-            return !isObserved;
-          })
-        },
-        new maplibregl.LngLatBounds()
-      );
+      const bounds = getCycloneBounds(data, maplibregl.LngLatBounds);
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, {
           maxZoom: MAX_ZOOM

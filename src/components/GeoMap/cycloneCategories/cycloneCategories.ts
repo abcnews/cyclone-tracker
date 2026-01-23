@@ -11,4 +11,5 @@ const cyclones = {
   4: cyclone4,
   5: cyclone5
 };
+
 export default cyclones;
