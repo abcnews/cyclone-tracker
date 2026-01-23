@@ -54,8 +54,6 @@
         center: [133.28, -28.15]
       });
 
-      map.on('zoom', () => console.log(map.getZoom()));
-
       // Zoom to cyclone
       const bounds = getCycloneBounds(data, maplibregl.LngLatBounds);
       if (!bounds.isEmpty()) {
